@@ -428,7 +428,7 @@ def write_motif(A, T, G, C, background, win_width, outpath):
     write_line(C, fileout)
     fileout.close()
     #Writes consensus sequence.
-    fileout_cs=open(outpath + 'Combined_motif_consensus_sequence.fasta', 'w')
+    fileout_cs=open(outpath + 'Combined_motif_consensus_sequence_' + str(win_width) + '.fasta', 'w')
     fileout_cs.write('>Combined_motif_consensus_sequence\n')
     alphabet=['A', 'T', 'G', 'C']
     for i in range(len(A)):
