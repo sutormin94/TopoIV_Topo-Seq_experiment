@@ -36,7 +36,7 @@ path_to_TUs_sets={'All_genes': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-
                   'All_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_operons_expression.txt",
                   'High_transcription_level_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_high_expression_operons_186.txt",
                   'Low_transcription_level_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_low_expression_operons_186.txt",
-                  'Top_long_and_active_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\Top_long_and_active_DOOR_Mu_operons_expression.txt",
+                  'Top_long_and_active_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_Top_long_and_active_expression_operons.txt",
                   '16S_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_16S_rRNA_operons.txt"}
 #Length of the genome, bp
 Genome_length=4647454
@@ -854,7 +854,7 @@ def TU_analysis_wrapper(input_dict, inpath, TUs_sets_path, path_out, genome_len)
     return
 
 
-#TU_analysis_wrapper(path_to_GCSs_files, Score_path, path_to_TUs_sets, TU_analysis_outpath, Genome_length)
+TU_analysis_wrapper(path_to_GCSs_files, Score_path, path_to_TUs_sets, TU_analysis_outpath, Genome_length)
 
 #######
 #Wrapper for intervals analysis functions.
@@ -870,6 +870,6 @@ def Interval_analysis_wrapper(input_dict, inpath, intervals_sets_path, path_out,
     GCSs_in_intervals(GCSs_sets_dict, Intervals_sets_dict, score_data, path_out, genome_len)
     return
 
-Interval_analysis_wrapper(path_to_GCSs_files, Score_path, path_to_intervals_sets, Intervals_analysis_outpath, Genome_length)
+#Interval_analysis_wrapper(path_to_GCSs_files, Score_path, path_to_intervals_sets, Intervals_analysis_outpath, Genome_length)
 
 print('Script ended its work succesfully!') 
