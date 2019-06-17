@@ -444,7 +444,7 @@ def write_motif(A, T, G, C, background, win_width, outpath):
 
 def Wrapper_motif_plotting_write(GCSs_form_motif_dict, Source_genome_path, outpath):
     background={'A': 0.245774783354, 'C': 0.2537191331, 'G': 0.254184334046, 'T': 0.246130246797}
-    window_width=30
+    window_width=40
     win_range=[(window_width/2)-2, (window_width/2)+2]
     Source_sequence=obtain_seq(Source_genome_path)[0]
     GCSs_seqs=return_seqs(GCSs_form_motif_dict, win_range, window_width, Source_sequence, outpath)
