@@ -150,7 +150,7 @@ def motif_construction_and_analysis(GCSs_dict, genomefam, genomefas, target_name
     #Scans forward sequence
     test_seq=Seq(str(genomefas), IUPAC.unambiguous_dna)
     whole_genome_scores=pssm.calculate(test_seq) 
-    outfile=open(outpath + target_name + '_scan_forward_with_combined_motif.txt', 'w')
+    outfile=open(outpath + target_name + '_scan_forward_with_combined_motif_' + str(win_width_l+win_width_r) + '.txt', 'w')
     dict_f={}
     #If test_seq len is equal to pssm, pssm.calculate() returns float32 but not the list.
     if len(test_seq)==win_width_l+win_width_r:
@@ -165,7 +165,7 @@ def motif_construction_and_analysis(GCSs_dict, genomefam, genomefas, target_name
     #Scans reverse complement sequence
     test_seq_rc=Seq(str(genomefas), IUPAC.unambiguous_dna).reverse_complement()
     whole_genome_scores_rc=pssm.calculate(test_seq_rc)   
-    outfile_rc=open(outpath + target_name + '_scan_rc_with_combined_motif.txt', 'w')
+    outfile_rc=open(outpath + target_name + '_scan_rc_with_combined_motif_' + str(win_width_l+win_width_r) + '.txt', 'w')
     dict_rc={}
     #If test_seq_rc len is equal to pssm, pssm.calculate() returns float32 but not the list.
     if len(test_seq_rc)==win_width_l+win_width_r:
@@ -274,8 +274,8 @@ Motif_defined_GSCs_dict=Wrapper_motif_construct_scan(Genome_seq_path, Target_seq
 #Writes sequences under the GCSs to file.
 #######
 
-def return_seqs(GCS_coords_dict, win_range, genomefa, outpath): 
-    fileout=open(outpath + 'Combined_motif_originated_sequences.fasta', 'w')
+def return_seqs(GCS_coords_dict, win_range, win_width, genomefa, outpath): 
+    fileout=open(outpath + 'Combined_motif_originated_sequences_' + str(win_width) + '.fasta', 'w')
     seqs=[]
     for k, v in GCS_coords_dict.items():
         seq=genomefa[int(int(k) - win_range[0] - 1):int(int(k) + win_range[1] - 1)]
@@ -376,7 +376,7 @@ def Plotting(matrix, matrix_type, win_width, outpath):
     plot1.set_ylabel(str(matrix_type + '%'), size=35)
     plt.tight_layout()
     #plt.show()
-    plt.savefig(outpath + 'Combined_motif_plot_transp_back.png', dpi=400, figsize=(16, 6), transparent=True)
+    plt.savefig(outpath + 'Combined_motif_plot_transp_back_' + str(win_width) + '.png', dpi=400, figsize=(16, 6), transparent=True)
     plt.close()
     return
 
@@ -385,7 +385,7 @@ def Plotting(matrix, matrix_type, win_width, outpath):
 #######
 
 def write_motif_deg(gc_matrix, win_width, outpath):
-    fileout=open(outpath + 'Degenerate_combined_motif_for_Fourier_analysis.txt', 'w')
+    fileout=open(outpath + 'Degenerate_combined_motif_for_Fourier_analysis_' + str(win_width) + '.txt', 'w')
     fileout.write("#X\tY\n")
     for i in range(len(gc_matrix)):
         fileout.write(str(int((-win_width/2)+1+i)) + '\t' + str(gc_matrix[i])+'\n')
@@ -444,10 +444,10 @@ def write_motif(A, T, G, C, background, win_width, outpath):
 
 def Wrapper_motif_plotting_write(GCSs_form_motif_dict, Source_genome_path, outpath):
     background={'A': 0.245774783354, 'C': 0.2537191331, 'G': 0.254184334046, 'T': 0.246130246797}
-    window_width=170
+    window_width=30
     win_range=[(window_width/2)-2, (window_width/2)+2]
     Source_sequence=obtain_seq(Source_genome_path)[0]
-    GCSs_seqs=return_seqs(GCSs_form_motif_dict, win_range, Source_sequence, outpath)
+    GCSs_seqs=return_seqs(GCSs_form_motif_dict, win_range, win_width, Source_sequence, outpath)
     pfms=make_PFM(GCSs_seqs)
     matrix_deg_red=gc_matrix_edit(pfms['GC'], background, window_width)
     Plotting(matrix_deg_red, 'GC', window_width, outpath)
