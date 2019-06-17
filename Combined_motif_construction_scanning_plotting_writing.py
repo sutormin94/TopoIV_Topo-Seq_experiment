@@ -447,7 +447,7 @@ def Wrapper_motif_plotting_write(GCSs_form_motif_dict, Source_genome_path, outpa
     window_width=30
     win_range=[(window_width/2)-2, (window_width/2)+2]
     Source_sequence=obtain_seq(Source_genome_path)[0]
-    GCSs_seqs=return_seqs(GCSs_form_motif_dict, win_range, win_width, Source_sequence, outpath)
+    GCSs_seqs=return_seqs(GCSs_form_motif_dict, win_range, window_width, Source_sequence, outpath)
     pfms=make_PFM(GCSs_seqs)
     matrix_deg_red=gc_matrix_edit(pfms['GC'], background, window_width)
     Plotting(matrix_deg_red, 'GC', window_width, outpath)
