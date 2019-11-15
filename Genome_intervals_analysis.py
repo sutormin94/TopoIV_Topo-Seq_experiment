@@ -60,7 +60,7 @@ path_to_intervals_sets={'BIMEs1': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_To
                   'Macrodomains': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\Macrodomains_E_coli_w3110_edited.broadPeak"}
 
 #Path for intervals analysis output.
-Intervals_analysis_outpath="F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_association_with_NAPs_BIMEs\\"
+Intervals_analysis_outpath="F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_association_with_NAPs_BIMEs_test\\"
 if not os.path.exists(Intervals_analysis_outpath):
     os.makedirs(Intervals_analysis_outpath)
  
@@ -688,12 +688,16 @@ def GCSs_in_intervals(GCSs_sets_dict, intervals, score_data, path_out, genome_le
     #Finds GCSs associated with intervals.
     GCSs_associated_info={} #Dictionary contains element corresponds to interval sets.
     for k, v in intervals.items(): #Iterate different interval types.
+        print(f'Interval set itarating: {k}')
         GCSs_associated_info[k]={}
         intervals_len=0
+        count_matched_intevals=0
         for i in v: #Iterate intevals.
             intervals_len+=i[1]-i[0]  
             interval_associated_GCSs={}
+            check_if_interval_matched=0
             for a, s in GCSs_sets_dict.items(): #Iterate GCSs sets.
+                print(f'GCSs set itarating: {k}')
                 if a not in GCSs_associated_info[k]:
                     GCSs_associated_info[k][a]=[0, [], []] #Dictionary contains elements corresponds to GCSs sets. [Number of GCSs, N3E values, Score values]
                 interval_associated_GCSs[a]=[] #Counter for the number of GCSs fall into the particular interval. Stores GCSs coordinates.
@@ -704,18 +708,21 @@ def GCSs_in_intervals(GCSs_sets_dict, intervals, score_data, path_out, genome_le
                             GCSs_associated_info[k][a][1].append(info[0])
                             GCSs_associated_info[k][a][2].append(info[1])
                             interval_associated_GCSs[a].append(gcs)
+                            check_if_interval_matched=1
                     elif 0<i[1]<i[0]: #Interval crosses position for genome start/end
                         if i[1]>gcs>=0 or genome_len>gcs>=i[0]:
                             GCSs_associated_info[k][a][0]+=1
                             GCSs_associated_info[k][a][1].append(info[0])
                             GCSs_associated_info[k][a][2].append(info[1])
-                            interval_associated_GCSs[a].append(gcs)                             
+                            interval_associated_GCSs[a].append(gcs)     
+                            check_if_interval_matched=1
                     elif i[0]<0 and i[1]>0: #Interval crosses position for genome start/end (alternative coordinate system for interval boundary setting)
                         if i[1]>gcs>=0 or genome_len>gcs>=genome_len+i[0]:
                             GCSs_associated_info[k][a][0]+=1
                             GCSs_associated_info[k][a][1].append(info[0])
                             GCSs_associated_info[k][a][2].append(info[1])
-                            interval_associated_GCSs[a].append(gcs)                          
+                            interval_associated_GCSs[a].append(gcs)  
+                            check_if_interval_matched=1
             
             #Writing data for BIMEs
             if k in ['BIMEs1', 'BIMEs2']:
@@ -769,6 +776,10 @@ def GCSs_in_intervals(GCSs_sets_dict, intervals, score_data, path_out, genome_le
                     num_GCSs_p_value=binom.cdf(num_GCSs_observed, len(GCSs_sets_dict[ab]), macro_len/genome_len_dc)
                     fileout_macro.write('\t' + condition + '\t' + str(num_GCSs_observed) + '\t' + str(round(num_GCSs_expected, 3)) + '\t' + str(num_GCSs_p_value))  
                 fileout_macro.write('\n')
+                
+            if check_if_interval_matched==1:
+                count_matched_intevals+=1
+        print(f'Number of intervals matched with GCSs: {count_matched_intevals}/{len(v)}')                
         
         #Writing statistics for all kinds of interval except chromosomal macrodomains.
         if k not in ['Macrodomains']:
@@ -870,6 +881,6 @@ def Interval_analysis_wrapper(input_dict, inpath, intervals_sets_path, path_out,
     GCSs_in_intervals(GCSs_sets_dict, Intervals_sets_dict, score_data, path_out, genome_len)
     return
 
-#Interval_analysis_wrapper(path_to_GCSs_files, Score_path, path_to_intervals_sets, Intervals_analysis_outpath, Genome_length)
+Interval_analysis_wrapper(path_to_GCSs_files, Score_path, path_to_intervals_sets, Intervals_analysis_outpath, Genome_length)
 
 print('Script ended its work succesfully!') 
