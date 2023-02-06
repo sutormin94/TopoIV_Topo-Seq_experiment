@@ -1,6 +1,6 @@
 # TopoIV_Topo-Seq_experiment
 
-Exploring Topoisomerase IV cleavage sites across *E. coli W3110* genome
+Exploring Topoisomerase IV cleavage sites across the *E. coli* W3110 genome
 
 Topoisomerase IV (Topo IV) is a type II topoisomerase that unlinks catenated DNA molecules in bacterial cells and also relaxes positive supercoiling.
 It operates with two DNA segments - so called G and T. During catalysis the enzyme introduces temporal double-stranded break into G-segment, transfers T-segment through it and religates the gap. 
