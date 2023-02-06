@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2019##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2022##
+##TopoIV Topo-Seq analysis##
 
 #Script computes Fold Enrichment (FE) over upstream (US)
 #and downstream (DS) regions of transcription units (TUs)
@@ -20,119 +20,52 @@ from Bio import SeqIO
 
 
 #Path to the directory with input files.
-Path_to_input_files='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\'
+Path_to_input_files='Data_analysis\FE\\'
 #Path to TUs groups file.
-TUs_groups_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_RNA-Seq\Expression_data\DY330_transcripts\Representative_transcripts\\"
+TUs_groups_path="TopoIV_Topo-Seq_experiment\Additional_genome_features\\"
 
 #Path to the input annotation, type of annotation and name of TUs set.
 ##1##
 Path_to_annotation_1=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_EP_del_cor.txt'
 Type_of_annot_1='broadPeak'             
-Genes_set_name_1='All_TUs_1672'    
+Genes_set_name_1='All_TUs_1672' 
 ##2##                                   
-Path_to_annotation_2=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_tRNA_rRNA_EP_del_cor.txt'
+Path_to_annotation_2=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_rRNA_EP_del_cor_HETU_200.txt'
 Type_of_annot_2='broadPeak'             
-Genes_set_name_2='All_TUs_no_tRNA_rRNA_1623'                
+Genes_set_name_2='HETU_no_rRNA_200'         
+##3##                                   
+Path_to_annotation_3=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_rRNA_EP_del_cor_LETU_200.txt'
+Type_of_annot_3='broadPeak'             
+Genes_set_name_3='LETU_no_rRNA_200' 
+##4##                                   
+Path_to_annotation_4=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt'
+Type_of_annot_4='broadPeak'             
+Genes_set_name_4='rRNA_7'               
 ##5##                                   
-Path_to_annotation_5=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt'
+Path_to_annotation_5=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_tRNA_49.txt'
 Type_of_annot_5='broadPeak'             
-Genes_set_name_5='rRNA_7'               
-##6##                                   
-Path_to_annotation_6=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_tRNA_49.txt'
-Type_of_annot_6='broadPeak'             
-Genes_set_name_6='tRNA_49'              
-##7##                                   
-Path_to_annotation_7=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_EP_del_cor.txt'
-Type_of_annot_7='broadPeak'             
-Genes_set_name_7='All_TUs_no_dps_1660'    
-##8##                                   
-Path_to_annotation_8=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_NO_RFA_no_tRNA_rRNA_EP_del_cor_HETU_200.txt'
-Type_of_annot_8='broadPeak'             
-Genes_set_name_8='HETU_no_dps_rfa_200'         
-##9##                                   
-Path_to_annotation_9=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_no_tRNA_rRNA_EP_del_cor_LETU_200.txt'
-Type_of_annot_9='broadPeak'             
-Genes_set_name_9='LETU_no_dps_200' 
-##10##                                   
-Path_to_annotation_10=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_EP_Long_Active_TUs_del_cor.txt'
-Type_of_annot_10='broadPeak'             
-Genes_set_name_10='Long_active_TUs_79' 
+Genes_set_name_5='tRNA_49'                  
+ 
 
 #Path to the file with regions to be omitted (e.g. deletions).
-Deletions_inpath='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
+Deletions_inpath='TopoIV_Topo-Seq_experiment\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
+#Path to the file with regions to be masked before other calculations.
+Mask_inpath='TopoIV_Topo-Seq_experiment\Additional_genome_features\\Regions_to_mask.bed'
 #Width of US, DS regions.
 Win_width=15000
 #Length of GB.
 Length=5000
 
 #Dictionary of pathes to input data.
-Dict_of_wigs_path={'RpoC_Borukhov' : Path_to_input_files+'Borukhov_RpoC_Pol_Sofi_LB_FE.wig',
-                   'RpoB_Kahramanoglou' : Path_to_input_files+'Kahramanoglou_RpoB_IP_ME.wig',
-                   'RpoS_Peano' : Path_to_input_files+'Peano_RpoS_FE_av.wig',
-                   'RpoS_Seo' : Path_to_input_files+'Seo_RpoS_FE_Rep1.wig',
-                   'RpoD_Myers' : Path_to_input_files + 'Myers_RpoD_FE_av.wig',
-                   'HNS_Kahramanoglou' : Path_to_input_files+'Kahramanoglou_HNS_IP_ME.wig',
-                   'Fis_Kahramanoglou' : Path_to_input_files+'Kahramanoglou_Fis_IP_ME.wig',
-                   'MukB_Nolivos' : Path_to_input_files+'Nolivos_MukB_IP_av.wig',
-                   'MatP_Nolivos' : Path_to_input_files+'Nolivos_MatP_IP_av.wig',
-                   'TopA_CTD_minus_Rif_minus_av_1_2_3' : Path_to_input_files + 'Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_123.wig',
-                   'TopA_CTD_minus_Rif_plus_av_1_2_3' : Path_to_input_files + 'Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig',
-                   'TopA_CTD_plus_Rif_minus_av_1_2_3' : Path_to_input_files + 'Sutormin_TopA_ChIP_CTD_plus_Rif_minus_FE_av.wig',
-                   'TopA_CTD_plus_Rif_plus_av_2_3' :   Path_to_input_files + 'Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig',                   
-                   'Gyrase_Cfx' : Path_to_input_files+'Sutormin_Gyrase_Cfx_10mkM_FE_av.wig',
-                   'Gyrase_Cfx_Rif' : Path_to_input_files+'Sutormin_Gyrase_RifCfx_122mkM_10mkM_FE_av.wig',
-                   'TopoIV_Cfx' : Path_to_input_files+'Sutormin_TopoIV_Cfx_FE_av.wig',
-                   'GC' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig',
-                   'RNA_Seq' : Path_to_input_files+'Sutormin_RNA_Seq_Exponential_av.wig'
+
+
+Dict_of_wigs_path={'TopoIV_Cfx'                    : Path_to_input_files + 'TopoIV_Cfx_av.wig',
+                   'TopoIV_GyrA_S83L_Cfx'          : Path_to_input_files + 'TopoIV_GyrA_S83L_Cfx_av.wig',
+                   'MukB'                          : Path_to_input_files + 'Nolivos_MukB_IP_av_FE.wig',
+                   'TopoIV_Cfx_div_MukB'           : Path_to_input_files + 'TopoIV_Cfx_div_MukB.wig',
+                   'TopoIV_GyrA_S83L_Cfx_div_MukB' : Path_to_input_files + 'TopoIV_GyrA_S83L_Cfx_div_MukB.wig', 
+                   'Gyrase'                        : Path_to_input_files + 'Sutormin_Gyrase_Cfx_10mkM_FE_av.wig'
                    }
-Dict_of_wigs_path_2={'RpoB_Borukhov_wt' : Path_to_input_files + 'Borukhov_RpoB_BW28357_FE_av.wig'}
-
-Dict_of_wigs_path_3={'noCTD_Rif_1_plus' : Path_to_input_files + 'EcTopoI_noCTD_Rif_motif_1_w3110_Mu_scanned_plus.wig',
-                     'noCTD_Rif_1_minus': Path_to_input_files + 'EcTopoI_noCTD_Rif_motif_1_w3110_Mu_scanned_minus.wig',
-                     'noCTD_Rif_1_both' : Path_to_input_files + 'EcTopoI_noCTD_Rif_motif_1_w3110_Mu_scanned_both.wig'}
-
-Dict_of_wigs_path_4={'Sutormin_TopA_CTD_minus_Rif_minus_av_346' :  Path_to_input_files + 'Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
-                     'Sutormin_EcTopoI_Y319F_FE_av':               Path_to_input_files + 'Sutormin_EcTopoI_Y319F_FE_av.wig',
-                     'Sutormin_EcTopoI_BW25113_delta11_FE_av' :    Path_to_input_files + 'Sutormin_EcTopoI_BW25113_delta11_FE_av.wig',
-                     'Sutormin_EcTopoI_BW25113_delta14_FE_av' :    Path_to_input_files + 'Sutormin_EcTopoI_BW25113_delta14_FE_av.wig',
-                     'Sutormin_EcTopoI_BW25113_delta30_FE_av' :    Path_to_input_files + 'Sutormin_EcTopoI_BW25113_delta30_FE_av.wig'}
-
-Dict_of_wigs_path_5={'TopoI_G116S_M320V_Ara_IP_1_N3E' :  Path_to_input_files + 'DSu_14_S14_edt_N3E.wig',
-                     'TopoI_G116S_M320V_Ara_IP_2_N3E':   Path_to_input_files + 'DSu_18_S18_edt_N3E.wig',
-                     'TopoI_G116S_M320V_Ara_IP_3_N3E' :  Path_to_input_files + 'DSu_22_S22_edt_N3E.wig',
-                     'TopoI_G116S_M320V_IP_1_N3E' :      Path_to_input_files + 'DSu_16_S16_edt_N3E.wig',
-                     'TopoI_G116S_M320V_IP_2_N3E' :      Path_to_input_files + 'DSu_18_S18_edt_N3E.wig',
-                     'TopoI_G116S_M320V_IP_3_N3E' :      Path_to_input_files + 'DSu_24_S24_edt_N3E.wig',
-                     'TopoI_G116S_M320V_Ara_IP_1_N5E' :  Path_to_input_files + 'DSu_14_S14_edt_N5E.wig',
-                     'TopoI_G116S_M320V_Ara_IP_2_N5E':   Path_to_input_files + 'DSu_18_S18_edt_N5E.wig',
-                     'TopoI_G116S_M320V_Ara_IP_3_N5E' :  Path_to_input_files + 'DSu_22_S22_edt_N5E.wig',
-                     'TopoI_G116S_M320V_IP_1_N5E' :      Path_to_input_files + 'DSu_16_S16_edt_N5E.wig',
-                     'TopoI_G116S_M320V_IP_2_N5E' :      Path_to_input_files + 'DSu_18_S18_edt_N5E.wig',
-                     'TopoI_G116S_M320V_IP_3_N5E' :      Path_to_input_files + 'DSu_24_S24_edt_N5E.wig'}
-
-Dict_of_wigs_path_6={'TopoI_G116S_M320V_Ara_IP_1_N3E_FE' :  Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_Ara_N3E_FE_1.wig',
-                     'TopoI_G116S_M320V_Ara_IP_2_N3E_FE':   Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_Ara_N3E_FE_2.wig',
-                     'TopoI_G116S_M320V_Ara_IP_3_N3E_FE' :  Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_Ara_N3E_FE_3.wig',
-                     'TopoI_G116S_M320V_Ara_IP_1_N5E_FE' :  Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_Ara_N5E_FE_1.wig',
-                     'TopoI_G116S_M320V_Ara_IP_2_N5E_FE' :  Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_Ara_N5E_FE_2.wig',
-                     'TopoI_G116S_M320V_Ara_IP_3_N5E_FE' :  Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_Ara_N5E_FE_3.wig',
-                     'TopoI_G116S_M320V_IP_1_N3E_FE' :      Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_N3E_FE_1.wig',
-                     'TopoI_G116S_M320V_IP_2_N3E_FE' :      Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_N3E_FE_2.wig',
-                     'TopoI_G116S_M320V_IP_3_N3E_FE' :      Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_N3E_FE_3.wig',
-                     'TopoI_G116S_M320V_IP_1_N5E_FE' :      Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_N5E_FE_1.wig',
-                     'TopoI_G116S_M320V_IP_2_N5E_FE' :      Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_N5E_FE_2.wig',
-                     'TopoI_G116S_M320V_IP_3_N5E_FE' :      Path_to_input_files + 'EcTopoI_G116S_M320V_Topo_Seq_N5E_FE_3.wig'}
-
-Dict_of_wigs_path_7={'Mooney_RpoC'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_FE_av.wig',
-                     'Mooney_RpoD'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoD_FE_av.wig',
-                     'Mooney_NusA'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_NusA_FE_av.wig',
-                     'Mooney_NusG'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_NusG_FE_av.wig',
-                     'Mooney_Rho'      : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_Rho_FE_av.wig',
-                     'Mooney_RpoC_Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_Rif_FE.wig',
-                     'Mooney_RpoC_BCM' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_BCM_FE.wig',
-                     'Mooney_RpoD_Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoD_Rif_FE.wig',
-                     }
-
 
 
 #######
@@ -145,7 +78,7 @@ def Dir_check_create(some_path):
     return
 
 #Path to the output directory.
-Out_path='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Signal_over_TUs\Representative_transcripts\\'
+Out_path='Data_analysis\Metagene_plots_repr_transcripts\\'
 
 #Output path.
 def create_out_dirs(out_path, genes_set_name):
@@ -156,12 +89,11 @@ def create_out_dirs(out_path, genes_set_name):
     Dir_check_create(out_path+'\Signal_of_TUs_wig\\'+genes_set_name)    
     return
 
+create_out_dirs(Out_path, Genes_set_name_1)
+create_out_dirs(Out_path, Genes_set_name_2)
+create_out_dirs(Out_path, Genes_set_name_3)
+create_out_dirs(Out_path, Genes_set_name_4)
 create_out_dirs(Out_path, Genes_set_name_5)
-create_out_dirs(Out_path, Genes_set_name_6)
-create_out_dirs(Out_path, Genes_set_name_7)
-create_out_dirs(Out_path, Genes_set_name_8)
-create_out_dirs(Out_path, Genes_set_name_9)
-create_out_dirs(Out_path, Genes_set_name_10)
 
 
 #######
@@ -169,15 +101,38 @@ create_out_dirs(Out_path, Genes_set_name_10)
 #Computes a total number of Ends.
 #######
 
-def wig_parsing(wigfile):
-    print('Now is processing: ' + str(wigfile))
-    wigin=open(wigfile, 'r')
-    NE_values=[]
-    for line in wigin:
-        line=line.rstrip().split(' ')
-        if line[0] not in ['track', 'fixedStep']:
-            NE_values.append(float(line[0]))
-    wigin.close()
+def wig_parsing(wigfile, masking_regs, masking):
+    if masking=="False":
+        #No masking.
+        print('Now is processing: ' + str(wigfile))
+        wigin=open(wigfile, 'r')
+        NE_values=[]
+        for line in wigin:
+            line=line.rstrip().split(' ')
+            if line[0] not in ['track', 'fixedStep']:
+                NE_values.append(float(line[0]))
+        wigin.close()
+    
+    elif masking=="True":
+        #With masking.
+        print('Now is processing: ' + str(wigfile))
+        wigin=open(wigfile, 'r')
+        NE_values=[]
+        Total_NE=0
+        for line in wigin:
+            line=line.rstrip().split(' ')
+            if line[0] not in ['track', 'fixedStep']:
+                NE_values.append(float(line[0]))
+                Total_NE+=float(line[0])
+        print('Total number of ends: ' + str(Total_NE))
+        wigin.close()
+        
+        Mean_RPKM=np.mean(NE_values)
+        for masking_reg in masking_regs:
+            masking_reg_len=masking_reg[1]-masking_reg[0]+1
+            masking_reg_mask=[Mean_RPKM]*masking_reg_len
+            NE_values[masking_reg[0]:masking_reg[1]]=masking_reg_mask
+        
     return NE_values
 
 #######
@@ -526,11 +481,14 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
 #######
 
 
-def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot, genes_set_name, deletions_inpath, win_width, length, out_path):
+def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot, genes_set_name, deletions_inpath, masking_regs_path, masking, win_width, length, out_path):
+    
+    masking_regs=deletions_info(masking_regs_path)
+    
     #Reads input data in wig files.
     dict_of_wigs={}
     for name, data_path in dict_of_wigs_path.items():
-        dict_of_wigs[name]=wig_parsing(data_path)
+        dict_of_wigs[name]=wig_parsing(data_path, masking_regs, masking)
     
     #Reads annotation.
     print(f'Now working with {path_to_annotation}')
@@ -544,10 +502,8 @@ def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot
         genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_path, deletions_inpath, win_width, length)
     return
 
-
-Wrapper_signal_over_TUs(Dict_of_wigs_path_7, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_7, Path_to_annotation_6,  Type_of_annot_6,  Genes_set_name_6,  Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_7, Path_to_annotation_7,  Type_of_annot_7,  Genes_set_name_7,  Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_7, Path_to_annotation_8,  Type_of_annot_8,  Genes_set_name_8,  Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_7, Path_to_annotation_9,  Type_of_annot_9,  Genes_set_name_9,  Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_7, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_1,  Type_of_annot_1,  Genes_set_name_1,  Deletions_inpath, Mask_inpath, "False", Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_2,  Type_of_annot_2,  Genes_set_name_2,  Deletions_inpath, Mask_inpath, "False", Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_3,  Type_of_annot_3,  Genes_set_name_3,  Deletions_inpath, Mask_inpath, "False", Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_4,  Type_of_annot_4,  Genes_set_name_4,  Deletions_inpath, Mask_inpath, "False", Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Deletions_inpath, Mask_inpath, "False", Win_width, Length, Out_path)

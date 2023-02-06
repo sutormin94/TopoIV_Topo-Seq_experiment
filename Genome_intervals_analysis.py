@@ -1,9 +1,9 @@
 ###############################################
-##Dmitry Sutormin, 2018##
+##Dmitry Sutormin, 2022##
 ##Topo-Seq analysis##
 
 #The script analysis sets of genome intervals (transcription units - TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)
-#for the enrichment of GCSs (binomial test), compares their N3E and score with mean GCSs N3E and score (t-test), 
+#for the enrichment of TCSs (binomial test), compares their N3E and score with mean TCSs N3E and score (t-test or poisson test), 
 #compares intervals mean score with genome mean score (t-test).
 ###############################################
 
@@ -25,42 +25,44 @@ from scipy.stats import binom
 print('Variables to be defined:')
 
 #Input data - GCSs, TAB.
-path_to_GCSs_files={'Cfx': "F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_sets_score\Cfx_trusted_TCSs_h_s.txt"}   
+path_to_GCSs_files={'Topo IV Cfx'   : "TopoIV_Topo-Seq_experiment\Additional_genome_features\TopoIV_TCSs_final_set_Cfx_wt_and_gyrA-S83L_N3E_score.txt",
+                    'Gyrase Cfx'    : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Gyrase_Cfx_10mkM_trusted_GCSs_N3E_score.txt",
+                    'Gyrase RifCfx' : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Gyrase_RifCfx_trusted_GCSs_N3E_score.txt"}   
 
 #Input data - score, WIG.
-Score_path="C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_G_Mu_score.wig"
+Score_path="TopoIV_Topo-Seq_experiment\Additional_genome_features\\TopoIV_TCSs_final_set_Cfx_wt_and_gyrA-S83L_E_coli_w3110_G_Mu_genome_score.wig"
 #Input data - sets of transcription units.
-path_to_TUs_sets={'All_genes': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_genes_expression.txt",
-                  'High_transcription_level_genes': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_high_expression_genes_370.txt",
-                  'Low_transcription_level_genes': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_low_expression_genes_370.txt",
-                  'All_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_operons_expression.txt",
-                  'High_transcription_level_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_high_expression_operons_186.txt",
-                  'Low_transcription_level_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_low_expression_operons_186.txt",
-                  'Top_long_and_active_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_Top_long_and_active_expression_operons.txt",
-                  '16S_operons': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\DOOR_Mu_del_cor_16S_rRNA_operons.txt"}
+path_to_TUs_sets={'All_TUs'                      : "TopoIV_Topo-Seq_experiment\Additional_genome_features\DY330_RNA-Seq_transcripts_representative_EP_del_cor.txt",
+                  'High_transcription_level_TUs' : "TopoIV_Topo-Seq_experiment\Additional_genome_features\DY330_RNA-Seq_transcripts_representative_no_rRNA_EP_del_cor_HETU_200.txt",
+                  'Low_transcription_level_TUs'  : "TopoIV_Topo-Seq_experiment\Additional_genome_features\DY330_RNA-Seq_transcripts_representative_no_rRNA_EP_del_cor_LETU_200.txt",
+                  '16S_TUs'                      : "TopoIV_Topo-Seq_experiment\Additional_genome_features\DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt"}
+
 #Length of the genome, bp
 Genome_length=4647454
+
 #Path for TU analysis output.
-TU_analysis_outpath="F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_association_with_TUs\\"
+TU_analysis_outpath="Data_analysis\TCSs_analysis\TCSs_association_with_TUs\\"
 if not os.path.exists(TU_analysis_outpath):
     os.makedirs(TU_analysis_outpath)
-#Input data - sets of intervals.
 
-path_to_intervals_sets={'BIMEs1': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\BIMEs1_coordinates.broadPeak",
-                  'BIMEs2': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\BIMEs2_coordinates.broadPeak",
-                  'IHFA': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\IHFA_sites_mid_exp_Prieto_W3110_Mu_SGS.BroadPeak",
-                  'IHFB': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\IHFB_sites_mid_exp_Prieto_W3110_Mu_SGS.BroadPeak",
-                  'IHFAB': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\IHFAB_sites_mid_exp_Prieto_W3110_Mu_SGS.BroadPeak",
-                  'H-NS': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\H-NS_sites_ME_Kahramanoglou_W3110_Mu_SGS.BroadPeak",
-                  'Fis': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\Fis_sites_ME_Kahramanoglou_W3110_Mu_SGS.BroadPeak",
-                  'MatP': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\MatP_sites_37deg_Nolivos_W3110_Mu_SGS.BroadPeak",
-                  'MatS': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\MatS_sites_Mercier_W3110_Mu_SGS.BroadPeak",
-                  'TopoIV' : "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\TopoIV_trusted_sites_Sayyed_W3110_Mu_SGS.BroadPeak",
-                  'MukB' : "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\MukB_sites_37deg_Nolivos_W3110_Mu_SGS.BroadPeak",
-                  'Macrodomains': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\Macrodomains_E_coli_w3110_edited.broadPeak"}
+#Input data - sets of intervals.
+path_to_intervals_sets={'BIMEs1'       : "TopoIV_Topo-Seq_experiment\Additional_genome_features\BIMEs1_coordinates.broadPeak",
+                        'BIMEs2'       : "TopoIV_Topo-Seq_experiment\Additional_genome_features\BIMEs2_coordinates.broadPeak",
+                        'IHFA'         : "TopoIV_Topo-Seq_experiment\Additional_genome_features\IHFA_sites_mid_exp_Prieto_W3110_Mu_SGS.BroadPeak",
+                        'IHFB'         : "TopoIV_Topo-Seq_experiment\Additional_genome_features\IHFB_sites_mid_exp_Prieto_W3110_Mu_SGS.BroadPeak",
+                        'IHFAB'        : "TopoIV_Topo-Seq_experiment\Additional_genome_features\IHFAB_sites_mid_exp_Prieto_W3110_Mu_SGS.BroadPeak",
+                        'H-NS'         : "TopoIV_Topo-Seq_experiment\Additional_genome_features\H-NS_sites_ME_Kahramanoglou_W3110_Mu_SGS.BroadPeak",
+                        'Fis'          : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Fis_sites_ME_Kahramanoglou_W3110_Mu_SGS.BroadPeak",
+                        'MatP'         : "TopoIV_Topo-Seq_experiment\Additional_genome_features\MatP_sites_37deg_Nolivos_W3110_Mu_SGS.BroadPeak",
+                        'MatS'         : "TopoIV_Topo-Seq_experiment\Additional_genome_features\MatS_sites_Mercier_W3110_Mu_SGS.BroadPeak",
+                        'TopoIV_NorfIP': "TopoIV_Topo-Seq_experiment\Additional_genome_features\Sayyed_NorfIP_TCSs_trusted_w3110_G_Mu.BroadPeak",
+                        'TopoIV_ChIP'  : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Sayyed_ChIPSeq_TCSs_trusted_w3110_G_Mu.BroadPeak",
+                        'Gyrase'       : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Gyrase_Cfx_10mkM_trusted_GCSs_N3E_score.BroadPeak",
+                        'MukB'         : "TopoIV_Topo-Seq_experiment\Additional_genome_features\MukB_sites_37deg_Nolivos_W3110_Mu_SGS.BroadPeak",
+                        'Macrodomains' : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Macrodomains_E_coli_w3110_edited.broadPeak"}
 
 #Path for intervals analysis output.
-Intervals_analysis_outpath="F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_association_with_NAPs_BIMEs_test\\"
+Intervals_analysis_outpath="Data_analysis\TCSs_analysis\TCSs_association_with_NAPs_BIMEs_test\\"
 if not os.path.exists(Intervals_analysis_outpath):
     os.makedirs(Intervals_analysis_outpath)
  
@@ -254,7 +256,7 @@ def TUs_parser(TUs_sets_path):
         for line in filein:
             tu={}
             line=line.rstrip().split('\t')
-            if line[0] not in ["GeneID", "OperonID"]:
+            if line[0] not in ["GeneID", "OperonID", "TU_ID"]:
                 tu['TUID']=str(line[0]) #TUID
                 tu['TU name']=str(line[1]) #TU name/composition
                 tu['Start']=int(line[2]) #Start
@@ -294,8 +296,13 @@ def TU_association(GCSs_sets_dict, TU_set, set_type, window_width, path_out, set
         for k in range(len(GCSs_sets_dict)):
             fileout.write("Condition\tGCSs in USUS\tGCSs in USGB\tGCSs in GBDS\tGCSs in DSDS\t")
         fileout.write("\n")
+    elif set_type=='TUs':
+        fileout.write("TU_ID\tTU_name\tStart\tEnd\tStrand\tExpression\t")  
+        for k in range(len(GCSs_sets_dict)):
+            fileout.write("Condition\tGCSs in USUS\tGCSs in USGB\tGCSs in GBDS\tGCSs in DSDS\t")
+        fileout.write("\n")    
     else:
-        print('Unknown type of the set! Possible types: 16S_operons, operons, genes.')
+        print('Unknown type of the set! Possible types: 16S_operons, operons, genes, TUs.')
         return
     operons_stat_ds={} #{condition : [number of GCSs, mean N3E, mean score, len of regions]}
     ds_regions_len=0
@@ -306,7 +313,7 @@ def TU_association(GCSs_sets_dict, TU_set, set_type, window_width, path_out, set
             if a not in operons_stat_ds:
                 if set_type=='16S operons':
                     operons_stat_ds[a]=[0, [], [], 0, [], [], 0, [], []] #[number of GCSs, N3E values, score values] for US, GB, DS correspondingly.
-                elif set_type=='operons' or set_type=='genes':
+                elif set_type=='operons' or set_type=='genes' or set_type=='TUs':
                     operons_stat_ds[a]=[0, [], [], 0, [], [], 0, [], [], 0, [], []] #[number of GCSs, N3E values, score values] for USUS, USGB, GBDS, DSDS correspondingly.
             fileout.write(a + '\t')
             stats=[0, 0, 0, 0, 0] #USUS USGB GB GBDS DSDS
@@ -363,7 +370,7 @@ def TU_association(GCSs_sets_dict, TU_set, set_type, window_width, path_out, set
                 operons_stat_ds[a][6]+=stats[4]
                 operons_stat_ds[a][7]+=N3E[4]
                 operons_stat_ds[a][8]+=score[4]                 
-            elif set_type=='operons' or set_type=='genes':
+            elif set_type=='operons' or set_type=='genes' or set_type=='TUs':
                 fileout.write(str(stats[0]) + '\t' + str(stats[1]) + '\t' + str(stats[3]) + '\t' + str(stats[4]) + '\t') #USUS, USGB, GBDS, DSDS
                 #USUS
                 operons_stat_ds[a][0]+=stats[0]
@@ -456,7 +463,7 @@ def TU_interval_stat_analysis(GCSs_sets_dict, intervals_GCSs_dict, intervals, sc
             fileout.write('binomial test\t' + a + '\tDS Number of GCSs\t' + str(intervals_GCSs_dict[a][6]) + '\t' + 
                           str(len(ns[0])) + '\t' + str(GCSs_number_stat) + '\n')            
     
-    elif set_type=='operons' or set_type=='genes':
+    elif set_type=='operons' or set_type=='genes' or set_type=='TUs':
         for a, ns in GCSs_values_dict.items():
             #N3E
             N3E_stat=poisson_twosample(len(ns[0]), sum(ns[0]), len(intervals_GCSs_dict[a][1]), sum(intervals_GCSs_dict[a][1]), ratio_null=1,
@@ -516,7 +523,7 @@ def TU_interval_stat_analysis(GCSs_sets_dict, intervals_GCSs_dict, intervals, sc
                       str(round(np.mean(score_data),3)) + '\t' + str(intervals_score_stat[1]) + '\t' + 't-statistic: ' + 
                       str(round(intervals_score_stat[0],3)) + '\n')
     
-    elif set_type=='operons' or set_type=='genes':
+    elif set_type=='operons' or set_type=='genes' or set_type=='TUs':
         intervals_values=[[], [], [], []] #USUS, USGB, GBDS, DSDS
         for i in intervals:
             if i['Strand']=='+':
@@ -592,12 +599,15 @@ def GCSs_number_norm_16S(intervals_GCSs_dict, GCSs_sets_dict, genome_len):
 def write_GCSs_norm(GCSs_set_exp_interval_dict, path_out, set_name):
     fileout=open(path_out + set_name + '_normalized_GCSs_numbers_and_statistics.txt', 'w')
     fileout.write('Condition\tCompartment\tNumber of GCSs expected\tNumber of GCSs observed\tp-value\tNumber of GCSs normalized\n')
-    if set_name=='16S_operons':
+    if set_name=='16S operons':
         Compartment_names=['US', 'GB', 'DS']
     else:
         Compartment_names=['USUS', 'USGB', 'GBDS', 'DSDS']
     for a, s in GCSs_set_exp_interval_dict.items():
         for i in range(len(Compartment_names)):
+            print(Compartment_names)
+            print(a)
+            print(s)
             fileout.write(a + '\t' + Compartment_names[i] + '\t' + str(round(s[0],3)) + '\t' + str(s[(i*3)+1]) + '\t' + str(s[(i*3)+2]) + '\t' + str(round(s[(i*3)+3],3)) +'\n')
     fileout.close()
     return
@@ -687,17 +697,18 @@ def GCSs_in_intervals(GCSs_sets_dict, intervals, score_data, path_out, genome_le
     
     #Finds GCSs associated with intervals.
     GCSs_associated_info={} #Dictionary contains element corresponds to interval sets.
+    intervals_len_dict={} #Dictionary with the length of investigating genomic intervals.
     for k, v in intervals.items(): #Iterate different interval types.
-        print(f'Interval set itarating: {k}')
+        print(f'Interval set iterating: {k}')
         GCSs_associated_info[k]={}
         intervals_len=0
         count_matched_intevals=0
-        for i in v: #Iterate intevals.
+        for i in v: #Iterate intervals.
             intervals_len+=i[1]-i[0]  
             interval_associated_GCSs={}
             check_if_interval_matched=0
             for a, s in GCSs_sets_dict.items(): #Iterate GCSs sets.
-                print(f'GCSs set itarating: {k}')
+                print(f'GCSs set iterating: {a}')
                 if a not in GCSs_associated_info[k]:
                     GCSs_associated_info[k][a]=[0, [], []] #Dictionary contains elements corresponds to GCSs sets. [Number of GCSs, N3E values, Score values]
                 interval_associated_GCSs[a]=[] #Counter for the number of GCSs fall into the particular interval. Stores GCSs coordinates.
@@ -750,6 +761,7 @@ def GCSs_in_intervals(GCSs_sets_dict, intervals, score_data, path_out, genome_le
                 
             #Writing data for chromosomal macrodomains       
             elif k in ['Macrodomains']:
+                
                 fileout_macro.write(i[2] + '\t' + str(i[0]) + '\t' + str(i[1]))
                 macro_len=i[1]-i[0]
                 for delet in deletions:
@@ -774,30 +786,87 @@ def GCSs_in_intervals(GCSs_sets_dict, intervals, score_data, path_out, genome_le
                     num_GCSs_observed=len(interval_associated_GCSs[ab])
                     num_GCSs_expected=len(GCSs_sets_dict[ab])*macro_len/genome_len_dc
                     num_GCSs_p_value=binom.cdf(num_GCSs_observed, len(GCSs_sets_dict[ab]), macro_len/genome_len_dc)
+                    if num_GCSs_p_value>0.5:
+                        num_GCSs_p_value=1-num_GCSs_p_value
                     fileout_macro.write('\t' + condition + '\t' + str(num_GCSs_observed) + '\t' + str(round(num_GCSs_expected, 3)) + '\t' + str(num_GCSs_p_value))  
                 fileout_macro.write('\n')
                 
             if check_if_interval_matched==1:
                 count_matched_intevals+=1
+        
+        intervals_len_dict[k]=intervals_len   
+                
+        if k in ['Macrodomains']:       
+            for i in v: #Iterate intervals.
+                Macrodomain_name=i[2]
+                print(f'Interval set iterating: Macordomain {Macrodomain_name}')
+                k='Macrodomain_' + Macrodomain_name
+                GCSs_associated_info[k]={}   
+                intervals_len=i[1]-i[0]
+                intervals_len_dict[k]=intervals_len   
+                interval_associated_GCSs={}
+                for a, s in GCSs_sets_dict.items(): #Iterate GCSs sets.
+                    print(f'GCSs set iterating: {a}')
+                    if a not in GCSs_associated_info[k]:
+                        GCSs_associated_info[k][a]=[0, [], []] #Dictionary contains elements corresponds to GCSs sets. [Number of GCSs, N3E values, Score values]
+                    interval_associated_GCSs[a]=[] #Counter for the number of GCSs fall into the particular interval. Stores GCSs coordinates.
+                    for gcs, info in s.items(): #Iterate GCSs.
+                        if i[1]>=i[0]>=0: #Interval does not cross position for genome start/end
+                            if i[1]>gcs>i[0]:
+                                GCSs_associated_info[k][a][0]+=1
+                                GCSs_associated_info[k][a][1].append(info[0])
+                                GCSs_associated_info[k][a][2].append(info[1])
+                                interval_associated_GCSs[a].append(gcs)
+                        elif 0<i[1]<i[0]: #Interval crosses position for genome start/end
+                            if i[1]>gcs>=0 or genome_len>gcs>=i[0]:
+                                GCSs_associated_info[k][a][0]+=1
+                                GCSs_associated_info[k][a][1].append(info[0])
+                                GCSs_associated_info[k][a][2].append(info[1])
+                                interval_associated_GCSs[a].append(gcs)     
+                        elif i[0]<0 and i[1]>0: #Interval crosses position for genome start/end (alternative coordinate system for interval boundary setting)
+                            if i[1]>gcs>=0 or genome_len>gcs>=genome_len+i[0]:
+                                GCSs_associated_info[k][a][0]+=1
+                                GCSs_associated_info[k][a][1].append(info[0])
+                                GCSs_associated_info[k][a][2].append(info[1])
+                                interval_associated_GCSs[a].append(gcs)  
         print(f'Number of intervals matched with GCSs: {count_matched_intevals}/{len(v)}')                
         
-        #Writing statistics for all kinds of interval except chromosomal macrodomains.
+    
+    #Writing statistics for all kinds of intervals.
+    for k, counts in GCSs_associated_info.items():
         if k not in ['Macrodomains']:
-            for a, s in GCSs_associated_info[k].items():
+            intervals_len=intervals_len_dict[k]
+            for a, s in counts.items():
+                #Statistics for the number of GCSs.
                 relative_intervals_len=float(intervals_len)/genome_len_dc
                 total_number_of_GCSs=len(GCSs_sets_dict[a])
                 expected_number_of_GCSs_in_interval=relative_intervals_len*total_number_of_GCSs 
-                GCSs_num_stat=binom.cdf(s[0], total_number_of_GCSs, relative_intervals_len) #Number of GCSs stat.
+                GCSs_num_p_value=binom.cdf(s[0], total_number_of_GCSs, relative_intervals_len) #Number of GCSs stat.
+                if GCSs_num_p_value>0.5:
+                    GCSs_num_p_value=1-GCSs_num_p_value                 
+                #Statistics for N3E of GCSs.
                 GCSs_N3E_stat=poisson_twosample(len(s[1]), sum(s[1]), len(GCSs_values_dict[a][0]), sum(GCSs_values_dict[a][0]), ratio_null=1,
-                                      method='exact-cond', alternative='two-sided') #GCSs N3E stat.                
+                                      method='exact-cond', alternative='two-sided') #GCSs N3E stat. 
+                GCSs_N3E_p_value=GCSs_N3E_stat[1]
+                if GCSs_N3E_p_value!='NA':
+                    if GCSs_N3E_p_value>0.5:
+                        GCSs_N3E_p_value=1-GCSs_N3E_p_value 
+                #Statistics for sequence score of GCSs.
                 GCSs_score_stat=stats.ttest_ind(s[2], GCSs_values_dict[a][1]) #GCSs score stat.
-                fileout.write(k + '\t' + a + '\t' + str(round(expected_number_of_GCSs_in_interval,3)) + '\t' + str(s[0]) + '\t' + str(GCSs_num_stat) + '\t' + 
-                              str(round(np.mean(s[1]),3)) + '\t' + str(round(np.mean(GCSs_values_dict[a][0]),3)) + '\t' + str(GCSs_N3E_stat[1]) + '\t' + 
-                              str(round(np.mean(s[2]),3)) + '\t' + str(round(np.mean(GCSs_values_dict[a][1]),3)) + '\t' + str(GCSs_score_stat[1]) + '\t' + str(round(GCSs_score_stat[0],3)) + '\n')
+                GCSs_score_p_value=GCSs_score_stat[1]
+                if GCSs_score_p_value!='NA':
+                    if GCSs_score_p_value>0.5:
+                        GCSs_score_p_value=1-GCSs_score_p_value                
+                #Write the stat data to file.
+                fileout.write(k + '\t' + a + '\t' + str(round(expected_number_of_GCSs_in_interval,3)) + '\t' + str(s[0]) + '\t' + str(GCSs_num_p_value) + '\t' + 
+                              str(round(np.mean(s[1]),3)) + '\t' + str(round(np.mean(GCSs_values_dict[a][0]),3)) + '\t' + str(GCSs_N3E_p_value) + '\t' + 
+                              str(round(np.mean(s[2]),3)) + '\t' + str(round(np.mean(GCSs_values_dict[a][1]),3)) + '\t' + str(GCSs_score_p_value) + '\t' + str(round(GCSs_score_stat[0],3)) + '\n')
     fileout.close()
     fileout1.close()
     fileout_macro.close()
     fileout_bime_rel.close()
+    
+    
     
     #Intervals score statistics.
     fileout2=open(path_out+'Intervals_score_statistics.txt', 'w')
@@ -828,39 +897,24 @@ def TU_analysis_wrapper(input_dict, inpath, TUs_sets_path, path_out, genome_len)
     #16S operons analysis.
     window_width_16S_operons=5000
     set_type_16S='16S operons'
-    GCSs_16S_assoc_info=TU_association(GCSs_sets_dict, TU_sets_dict['16S_operons'], set_type_16S, window_width_16S_operons, path_out, set_type_16S)
-    TU_interval_stat_analysis(GCSs_sets_dict, GCSs_16S_assoc_info, TU_sets_dict['16S_operons'], score_data, window_width_16S_operons, set_type_16S, path_out, set_type_16S, genome_len)
+    GCSs_16S_assoc_info=TU_association(GCSs_sets_dict, TU_sets_dict['16S_TUs'], set_type_16S, window_width_16S_operons, path_out, set_type_16S)
+    TU_interval_stat_analysis(GCSs_sets_dict, GCSs_16S_assoc_info, TU_sets_dict['16S_TUs'], score_data, window_width_16S_operons, set_type_16S, path_out, set_type_16S, genome_len)
     GCSs_set_exp_interval_dict_16S=GCSs_number_norm_16S(GCSs_16S_assoc_info, GCSs_sets_dict, genome_len)
-    write_GCSs_norm(GCSs_set_exp_interval_dict_16S, path_out, '16S_operons')  
+    write_GCSs_norm(GCSs_set_exp_interval_dict_16S, path_out, set_type_16S)  
     
-    #All genes analysis.
-    window_width=650
-    GCSs_all_genes_assoc_info=TU_association(GCSs_sets_dict, TU_sets_dict['All_genes'], 'genes', window_width, path_out, 'All_genes')
-    TU_interval_stat_analysis(GCSs_sets_dict, GCSs_all_genes_assoc_info, TU_sets_dict['All_genes'], score_data, window_width, 'genes', path_out, 'All_genes', genome_len)
-    GCSs_set_exp_interval_dict_ag=GCSs_num_normalization(GCSs_all_genes_assoc_info, GCSs_all_genes_assoc_info, GCSs_sets_dict, TU_sets_dict['All_genes'], TU_sets_dict['All_genes'])
-    write_GCSs_norm(GCSs_set_exp_interval_dict_ag, path_out, 'All_genes')    
+    #All TUs analysis.
+    window_width=5000
+    GCSs_all_genes_assoc_info=TU_association(GCSs_sets_dict, TU_sets_dict['All_TUs'], 'TUs', window_width, path_out, 'All_TUs')
+    TU_interval_stat_analysis(GCSs_sets_dict, GCSs_all_genes_assoc_info, TU_sets_dict['All_TUs'], score_data, window_width, 'TUs', path_out, 'All_TUs', genome_len)
+    GCSs_set_exp_interval_dict_ag=GCSs_num_normalization(GCSs_all_genes_assoc_info, GCSs_all_genes_assoc_info, GCSs_sets_dict, TU_sets_dict['All_TUs'], TU_sets_dict['All_TUs'])
+    write_GCSs_norm(GCSs_set_exp_interval_dict_ag, path_out, 'All_TUs')    
     
-    #Other genes sets analysis.
+    #Other TUs sets analysis (except 16S operons).
     for k, v in TU_sets_dict.items():
-        if k not in ['All_genes'] and k.find('genes')>0: #k contains 'genes' as a substring but not equial to 'All_genes'.
-            GCSs_genes_assoc_info=TU_association(GCSs_sets_dict, v, 'genes', window_width, path_out, k)
-            TU_interval_stat_analysis(GCSs_sets_dict, GCSs_genes_assoc_info, v, score_data, window_width, 'genes', path_out, k, genome_len)
-            GCSs_set_exp_interval_dict_g=GCSs_num_normalization(GCSs_all_genes_assoc_info, GCSs_genes_assoc_info, GCSs_sets_dict, TU_sets_dict['All_genes'], TU_sets_dict[k])
-            write_GCSs_norm(GCSs_set_exp_interval_dict_g, path_out, k)
-            
-    #All operons analysis.
-    window_width=650
-    GCSs_all_operons_assoc_info=TU_association(GCSs_sets_dict, TU_sets_dict['All_operons'], 'operons', window_width, path_out, 'All_operons')
-    TU_interval_stat_analysis(GCSs_sets_dict, GCSs_all_operons_assoc_info, TU_sets_dict['All_operons'], score_data, window_width, 'operons', path_out, 'All_operons', genome_len)
-    GCSs_set_exp_interval_dict_ao=GCSs_num_normalization(GCSs_all_operons_assoc_info, GCSs_all_operons_assoc_info, GCSs_sets_dict, TU_sets_dict['All_operons'], TU_sets_dict['All_operons'])
-    write_GCSs_norm(GCSs_set_exp_interval_dict_ao, path_out, 'All_operons')    
-    
-    #Other operons sets analysis (except 16S operons).
-    for k, v in TU_sets_dict.items():
-        if k not in ['All_operons', '16S_operons'] and k.find('operons')>0: #k contains 'operons' as a substring but not equial to 'All_operons' or '16S_operons'.
-            GCSs_operons_assoc_info=TU_association(GCSs_sets_dict, v, 'operons', window_width, path_out, k)
-            TU_interval_stat_analysis(GCSs_sets_dict, GCSs_operons_assoc_info, v, score_data, window_width, 'operons', path_out, k, genome_len)
-            GCSs_set_exp_interval_dict_o=GCSs_num_normalization(GCSs_all_operons_assoc_info, GCSs_operons_assoc_info, GCSs_sets_dict, TU_sets_dict['All_operons'], TU_sets_dict[k])
+        if k not in ['All_TUs', '16S_TUs'] and k.find('TUs')>0: #k contains 'operons' as a substring but not equial to 'All_TUs' or '16S_operons'.
+            GCSs_operons_assoc_info=TU_association(GCSs_sets_dict, v, 'TUs', window_width, path_out, k)
+            TU_interval_stat_analysis(GCSs_sets_dict, GCSs_operons_assoc_info, v, score_data, window_width, 'TUs', path_out, k, genome_len)
+            GCSs_set_exp_interval_dict_o=GCSs_num_normalization(GCSs_all_genes_assoc_info, GCSs_operons_assoc_info, GCSs_sets_dict, TU_sets_dict['All_TUs'], TU_sets_dict[k])
             write_GCSs_norm(GCSs_set_exp_interval_dict_o, path_out, k)
     return
 

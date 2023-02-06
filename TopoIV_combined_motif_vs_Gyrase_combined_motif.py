@@ -1,8 +1,8 @@
 ###############################################
-##Dmitry Sutormin, 2018##
+##Dmitry Sutormin, 2022##
 ##Topo-Seq analysis##
 
-#The script takes several PFM (e.g. Gyrase and TopoIV) and plots them together. 
+#The script takes several PFM (e.g. Gyrase and Topo IV) and plots them together. 
 ###############################################
 
 #######
@@ -14,7 +14,7 @@ import scipy
 import numpy as np
 from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio.Alphabet  import IUPAC 
+from Bio.Alphabet  import IUPAC
 import matplotlib.pyplot as plt
 
 #######
@@ -24,11 +24,11 @@ import matplotlib.pyplot as plt
 print('Variables to be defined:')
 
 #Input: Motifs, two-column TAB.
-path_to_combined_motifs={'TopoIV' : "F:\TopoIV_Topo-Seq\GCSs_analysis\Combined_motif\Degenerate_combined_motif_for_Fourier_analysis.txt", 
-                         'Gyrase' : "C:\Sutor\science\DNA-gyrase\Results\GCSs_sets_and_motifs\Combined_motif\Degenerate_combined_motif_for_Fourier_analysis.txt"}
+path_to_combined_motifs={'TopoIV' : "TopoIV_Topo-Seq_experiment\Additional_genome_features\TopoIV_Cfx_GC_pfm_170.txt", 
+                         'Gyrase' : "TopoIV_Topo-Seq_experiment\Additional_genome_features\Gyrase_Cfx_GC_pfm_170.txt"}
 
 #Output: prefix of the output path.
-Output_data_prefix="F:\TopoIV_Topo-Seq\GCSs_analysis\TopoIV_vs_Gyrase_motif\\"
+Output_data_prefix="Data_analysis\TCSs_analysis\TopoIV_vs_Gyrase_motif\\"
 if not os.path.exists(Output_data_prefix):
     os.makedirs(Output_data_prefix)
     
@@ -93,7 +93,7 @@ def Plotting(Motifs_dict, Coordinates, matrix_type, outpath):
         i+=1
     plt.legend(fontsize=25)
     plt.tight_layout()
-    plt.savefig(outpath + 'Combined_motif_TopoIV_vs_Gyrase.png', dpi=400, figsize=(16, 6))
+    plt.savefig(outpath + 'Combined_motif_TopoIV_vs_Gyrase.svg', dpi=400, figsize=(16, 6))
     plt.close()
     return
 

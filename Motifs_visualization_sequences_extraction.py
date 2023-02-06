@@ -1,8 +1,8 @@
 ###############################################
-##Dmitry Sutormin, 2019##
+##Dmitry Sutormin, 2022##
 ##TopoIV Topo-Seq analysis##
 
-#The script takes sets of trusted GCSs as input and plots motifs using the sequences under the GCSs.
+#The script takes sets of trusted TCSs as input and plots motifs using the sequences under the TCSs.
 #Also it writes sequences and motif to the files.
 ###############################################
 
@@ -26,13 +26,15 @@ from scipy.stats import binom_test
 print('Variables to be defined:')
 
 #Input data - GCSs, TAB.
-path_to_GCSs_files={'Cfx': "F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_sets\Cfx_trusted_GCSs.txt"}
+path_to_TCSs_files={'Cfx_S83L': "Data_analysis\GCSs_analysis\GCSs_sets\Cfx_S83L_trusted_GCSs.txt",
+                    'Cfx'     : "Data_analysis\GCSs_analysis\GCSs_sets\Cfx_trusted_GCSs.txt",
+                    }
 
 #Path to the genome FASTA.
-Genome_path="C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome_path="TopoIV_Topo-Seq_experiment\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 
 #Path for the output.
-Output_path="F:\TopoIV_Topo-Seq\GCSs_analysis\Motif\\"
+Output_path="Data_analysis\GCSs_analysis\Motif\\"
 if not os.path.exists(Output_path):
         os.makedirs(Output_path)
 
@@ -166,27 +168,17 @@ def Plotting(PFMs_set, title, matrix_type, write_out, win_width):
         plot1 = plt.subplot()
         plot1.set_xticks([0], minor=True)
         plot1.xaxis.grid(True, which='minor', linewidth=0.5, linestyle='--', alpha=1)            
+        #Cfx_S83L
+        plot1.plot(x_axis, PFMs_set['Cfx_S83L'], color='#7FCE79', linewidth=4, alpha=0.6)
+        plot1.plot(x_axis, PFMs_set['Cfx_S83L'], color='#454F24', linewidth=1, alpha=0.6)
+        plot1.plot(x_axis, PFMs_set['Cfx_S83L'], 'o', fillstyle='none', color='#7FCE79', markeredgecolor='#454F24', markersize=2, alpha=0.6)        
         #Cfx
-        plot1.plot(x_axis, PFMs_set['Cfx'], color='#7FCE79', linewidth=4, alpha=0.6)
-        plot1.plot(x_axis, PFMs_set['Cfx'], color='#454F24', linewidth=1, alpha=0.6)
-        plot1.plot(x_axis, PFMs_set['Cfx'], 'o', fillstyle='none', color='#7FCE79', markeredgecolor='#454F24', markersize=2, alpha=0.6)        
-        #Rif_Cfx
-        #plot1.plot(x_axis, PFMs_set['RifCfx'], color='#BAE85C', linewidth=4, alpha=0.6)
-        #plot1.plot(x_axis, PFMs_set['RifCfx'], color='#4D590D', linewidth=1, alpha=0.6)
-        #plot1.plot(x_axis, PFMs_set['RifCfx'], 'o', fillstyle='none', color='#BAE85C', markeredgecolor='#4D590D', markersize=2, alpha=0.6)       
-        #Micro
-        #plot1.plot(x_axis, PFMs_set['Micro'], color='#ff878b', linewidth=4, alpha=0.7)
-        #plot1.plot(x_axis, PFMs_set['Micro'], color='#7D212B', linewidth=1, alpha=1)
-        #plot1.plot(x_axis, PFMs_set['Micro'], 'o', fillstyle='none', color='#ff878b', markeredgecolor='#7D212B', markersize=2, alpha=1)
-        #Oxo
-        #plot1.plot(x_axis, PFMs_set['Oxo'], color='#8991ff', linewidth=4)
-        #plot1.plot(x_axis, PFMs_set['Oxo'], color='#470A59', linewidth=1)
-        #plot1.plot(x_axis, PFMs_set['Oxo'], 'o', fillstyle='none', color='#8991ff', markeredgecolor='#470A59', markersize=2, alpha=0.8)   
+        plot1.plot(x_axis, PFMs_set['Cfx'], color='#ff878b', linewidth=4, alpha=0.6)
+        plot1.plot(x_axis, PFMs_set['Cfx'], color='#7D212B', linewidth=1, alpha=0.6)
+        plot1.plot(x_axis, PFMs_set['Cfx'], 'o', fillstyle='none', color='#ff878b', markeredgecolor='#4D590D', markersize=2, alpha=0.6)       
         #Tracks annotation
-        plot1.annotate('Ciprofloxacin', xytext=(-75, 0.8), xy=(40, 0.85), color='#7FCE79', weight="bold", size=15)
-        #plot1.annotate('Rifampicin Ciprofloxacin', xytext=(-75, 0.75), xy=(40, 0.85), color='#BAE85C', weight="bold", size=15)
-        #plot1.annotate('Microcin B17', xytext=(-75, 0.7), xy=(40, 0.85), color='#ff878b', weight="bold", size=15)
-        #plot1.annotate('Oxolinic acid', xytext=(-75, 0.65), xy=(40, 0.85), color='#8991ff', weight="bold", size=15)        
+        plot1.annotate('Cfx S83L', xytext=(-75, 0.8), xy=(40, 0.85), color='#7FCE79', weight="bold", size=15)
+        plot1.annotate('Cfx', xytext=(-75, 0.75), xy=(40, 0.85), color='#ff878b', weight="bold", size=15)        
         #Set axis parameters
         plot1.tick_params(axis='both', direction='in', bottom='on', top='on', left='on', right='on')
         plot1.axis(ax_range)
@@ -264,23 +256,24 @@ def Plotting_stat(GC_PFM, num_seq, title, matrix_type, genome_sequence, write_ou
 #Wraps all the functions together.
 #######
 
-def wrap_function(GCSs_input, genome_input_path, output_path):
+def wrap_function(TCSs_input, genome_input_path, output_path):
         win_width=170
         win_range=[(win_width/2)-2, (win_width/2)+2]
         PFM_type='GC'
         plot_title='TopoIV motifs obtained for different Topo-Seq conditions'
-        GCSs_dict=trusted_GCSs_parsing(GCSs_input)
+        TCSs_dict=trusted_GCSs_parsing(TCSs_input)
         genome_sequence=genome_seq(genome_input_path)
         dict_of_PFMs={}
-        for k, v in GCSs_dict.items():
+        for k, v in TCSs_dict.items():
                 sequences_list=return_seqs(v, win_range, genome_sequence, output_path+str(k)+'_sequences_under_TCSs_full.fasta', output_path+str(k)+'_sequences_under_TCSs_6bp_LOGO.fasta')
                 PFMs=make_PFM(sequences_list)
                 write_motif(PFMs[PFM_type], output_path+str(k)+'_GC_pfm.txt', win_width)
                 dict_of_PFMs[k]=PFMs[PFM_type]
                 Plotting_stat(PFMs[PFM_type], PFMs['Num_seqs'], 'TopoIV motif statistic for '+k, PFM_type, genome_sequence, output_path+PFM_type+'_topoIV_motif_trusted_TCSs_statistic_'+str(k)+'.png', win_width)
         Plotting(dict_of_PFMs, plot_title, PFM_type, output_path+'TopoIV_motif_trusted_TCSs_Cfx'+str(PFM_type)+'.png', win_width)
+        Plotting(dict_of_PFMs, plot_title, PFM_type, output_path+'TopoIV_motif_trusted_TCSs_Cfx'+str(PFM_type)+'.svg', win_width)
         return
 
-wrap_function(path_to_GCSs_files, Genome_path, Output_path)
+wrap_function(path_to_TCSs_files, Genome_path, Output_path)
 
 print('Script ended its work succesfully!') 

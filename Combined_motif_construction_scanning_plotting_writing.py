@@ -1,9 +1,9 @@
 ###############################################
-##Dmitry Sutormin, 2018##
+##Dmitry Sutormin, 2022##
 ##Topo-Seq analysis##
 
-#The script takes sets of trusted GCSs as input, filters GCSs with highest N3E,
-#makes a combined set consists of these GCSs, returns sequences under them and constructs
+#The script takes sets of trusted TCSs as input, filters TCSs with highest N3E,
+#makes a combined set consists of these TCSs, returns sequences under them and constructs
 #PSSM matrix by the way getting rid of antibiotic-specific bias at positions forming the
 #cleavage site. Than the script scans a sequence of interest with the PSSM, 
 #returns the results of scanning (WIG file), plots combined motif and writes it in a GC% degenerate and 
@@ -31,25 +31,26 @@ import matplotlib.pyplot as plt
 print('Variables to be defined:')
 
 #Input: GCSs data, TAB.
-path_to_GCSs_files={'Cfx': "F:\TopoIV_Topo-Seq\GCSs_analysis\GCSs_sets\Cfx_trusted_GCSs.txt"}
+path_to_GCSs_files={'S83L_Cfx': "Data_analysis\TCSs_analysis\TCSs_sets\Cfx_S83L_trusted_GCSs.txt",
+                    'Cfx'     : "Data_analysis\TCSs_analysis\TCSs_sets\Cfx_trusted_GCSs.txt"}
 
 #Input: path to the E. coli genome (source of sequences for PFM/PWM construction), FASTA.
-Genome_seq_path="C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome_seq_path="TopoIV_Topo-Seq_experiment\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 
 #Input: path to the sequence to be scanned, FASTA.
-Target_seq_path="C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Target_seq_path="TopoIV_Topo-Seq_experiment\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Input: name of the target sequence ready to be scanned.
 Target_seq_name="E_coli_w3110_G_Mu_genome"
 #Input: dataset name for WIG header.
-Dataset_name="Cfx"
+Dataset_name="Cfx_and_S83L_Cfx"
 
 #Output: prefix of the output path.
-Output_data_prefix="F:\TopoIV_Topo-Seq\GCSs_analysis\Combined_motif\\"
+Output_data_prefix="Data_analysis\TCSs_analysis\Cfx_and_S83L_Cfx\\"
 if not os.path.exists(Output_data_prefix):
     os.makedirs(Output_data_prefix)
     
 #Output: path to the output WIG file.
-path_to_res_score_files="F:\TopoIV_Topo-Seq\GCSs_analysis\Score_tracks\\"
+path_to_res_score_files="Data_analysis\TCSs_analysis\Cfx_and_S83L_Cfx\\"
 if not os.path.exists(path_to_res_score_files):
     os.makedirs(path_to_res_score_files)
 Output_score_wig=path_to_res_score_files + Target_seq_name + "_score.wig"
@@ -102,14 +103,23 @@ def sorting_combining(GCSs_dict):
     threshold=min(GCSs_sets_len)
     #Return GCSs for combined motif construction.
     GCSs_set_for_motif={}
+    GCSs_set_for_motif_no_lim={}
     for k, v in GCSs_dict.items():
+        #Select only top-enriched GCSs.
         list_of_keys_sbv=sorted(v, key=v.get)
+        #print(list_of_keys_sbv)
         list_of_keys_sbv_slice=list_of_keys_sbv[-threshold:]
+        #print(list_of_keys_sbv_slice)
         for i in list_of_keys_sbv_slice:
             if i not in GCSs_set_for_motif:
                 GCSs_set_for_motif[i]=v[i]
-    print("Number of Cfx Micro Oxo GCSs for combined motif construction: " + str(len(GCSs_set_for_motif)))  
-    return GCSs_set_for_motif 
+        #Take all GCSs.
+        for GCS_coord, GCSs_enrich in v.items():
+            if GCS_coord not in GCSs_set_for_motif_no_lim:
+                GCSs_set_for_motif_no_lim[GCS_coord]=GCSs_enrich            
+    print("Number of top-enriched GCSs for combined motif construction: " + str(len(GCSs_set_for_motif))) 
+    print("Number of unique GCSs for combined motif construction: " + str(len(GCSs_set_for_motif_no_lim))) 
+    return GCSs_set_for_motif, GCSs_set_for_motif_no_lim
 
 #######
 #Extracts sequences using GCSs coordinates (GCSs_ar) from DNA seq (genomefam), computes PWM and scans sequence of interest (genomefas).
@@ -247,6 +257,16 @@ def top_scored_sites_and_GCSs(ar_max, GCSs_sets_dict, outpath):
     fileout_vic.close()
     return
 
+
+def write_GCSs(GCSs_dict, fileoutpath):
+    fileout=open(fileoutpath, 'w')
+    fileout.write('GCSs_coordinate\tN3E\n')
+    for GCS_coord, GCS_N3E in GCSs_dict.items():
+        fileout.write(str(GCS_coord) + '\t' + str(GCS_N3E) + '\n')
+    fileout.close()
+    
+    return
+
 #######
 #Wraps functions for motif construction and for scanning sequences of interest with it.
 #######
@@ -255,15 +275,27 @@ def Wrapper_motif_construct_scan(Source_genome_path, Target_genome_path, target_
     Source_sequence=obtain_seq(Source_genome_path)[0]
     Target_sequence, chr_name=obtain_seq(Target_genome_path)
     GCSs_sets=trusted_GCSs_parsing(GCSs_files_paths)
-    GCSs_for_motif=sorting_combining(GCSs_sets)
+    GCSs_for_motif, GCSs_set_for_motif_no_lim=sorting_combining(GCSs_sets)
+    #Write selected GCSs data.
+    write_GCSs(GCSs_for_motif, os.path.join(outpath, 'Top_score_TCSs_final_'+ds_name+'_h.txt'))
+    write_GCSs(GCSs_set_for_motif_no_lim, os.path.join(outpath, 'All_unique_TCSs_final_'+ds_name+'_h.txt'))
+    
+    #For top-enriched GCSs.
     f_rc_scan=motif_construction_and_analysis(GCSs_for_motif, Source_sequence, Target_sequence, target_name, outpath)
     ar_max=combine_score_fw_rc(f_rc_scan[0], f_rc_scan[1], Target_sequence, wig_path_out, ds_name, chr_name)
     if Target_genome_path==Source_genome_path:
         top_scored_sites_and_GCSs(ar_max, GCSs_sets, outpath_top_score)
-    return GCSs_for_motif
+        
+    #For all unique GCSs.
+    f_rc_scan=motif_construction_and_analysis(GCSs_set_for_motif_no_lim, Source_sequence, Target_sequence, target_name+"_unique_GCSs_", outpath)
+    ar_max=combine_score_fw_rc(f_rc_scan[0], f_rc_scan[1], Target_sequence, wig_path_out+"Unique_GCSs_", ds_name+"_unique_GCSs_", chr_name)
+    if Target_genome_path==Source_genome_path:
+        top_scored_sites_and_GCSs(ar_max, GCSs_sets, outpath_top_score+"Unique_GCSs_")    
+    return GCSs_for_motif, GCSs_set_for_motif_no_lim
 
 
-Motif_defined_GSCs_dict=Wrapper_motif_construct_scan(Genome_seq_path, Target_seq_path, Target_seq_name, path_to_GCSs_files, Output_data_prefix, path_to_res_score_files, Output_score_wig, Dataset_name)
+Motif_defined_GSCs_dict, Motif_defined_GSCs_dict_no_lim=Wrapper_motif_construct_scan(Genome_seq_path, Target_seq_path, Target_seq_name, path_to_GCSs_files, Output_data_prefix, path_to_res_score_files, Output_score_wig, Dataset_name)
+
 
 ###############################################
 #The motif plotting and writing.
@@ -456,5 +488,6 @@ def Wrapper_motif_plotting_write(GCSs_form_motif_dict, Source_genome_path, outpa
     return
 
 Wrapper_motif_plotting_write(Motif_defined_GSCs_dict, Genome_seq_path, Output_data_prefix)
+Wrapper_motif_plotting_write(Motif_defined_GSCs_dict_no_lim, Genome_seq_path, Output_data_prefix+"Unique_GCSs_")
 
 print('Script ended its work succesfully!') 

@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2021##
-##TopoI ChIP-Seq analysis##
+##Dmitry Sutormin, 2022##
+##TopoIV Topo-Seq analysis##
 
 #Script computes Fold Enrichment (FE) over upstream (US)
 #and downstream (DS) regions of transcription units (TUs)
@@ -23,37 +23,33 @@ from scipy import stats
 
 
 #Path to the directory with input files.
-PWD='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\\'
+PWD='Data_analysis\\'
 #Path to TUs groups file.
-TUs_groups_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_RNA-Seq\Expression_data\DY330_transcripts\Representative_transcripts\\"
+TUs_groups_path="TopoIV_Topo-Seq_experiment\Additional_genome_features\\"
 #Path to the input annotation, type of annotation and name of TUs set.       
+##1##
+Path_to_annotation_1=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_EP_del_cor.txt'
+Type_of_annot_1='broadPeak'             
+Genes_set_name_1='All_TUs_1672' 
+##2##                                   
+Path_to_annotation_2=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_rRNA_EP_del_cor_HETU_200.txt'
+Type_of_annot_2='broadPeak'             
+Genes_set_name_2='HETU_no_rRNA_200'         
+##3##                                   
+Path_to_annotation_3=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_rRNA_EP_del_cor_LETU_200.txt'
+Type_of_annot_3='broadPeak'             
+Genes_set_name_3='LETU_no_rRNA_200' 
+##4##                                   
+Path_to_annotation_4=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt'
+Type_of_annot_4='broadPeak'             
+Genes_set_name_4='rRNA_7'               
 ##5##                                   
-Path_to_annotation_5=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt'
+Path_to_annotation_5=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_tRNA_49.txt'
 Type_of_annot_5='broadPeak'             
-Genes_set_name_5='rRNA_7'               
-##6##                                   
-Path_to_annotation_6=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_tRNA_49.txt'
-Type_of_annot_6='broadPeak'             
-Genes_set_name_6='tRNA_49'              
-##7##                                   
-Path_to_annotation_7=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_EP_del_cor.txt'
-Type_of_annot_7='broadPeak'             
-Genes_set_name_7='All_TUs_no_dps_1660'    
-##8##                                   
-Path_to_annotation_8=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_NO_RFA_no_tRNA_rRNA_EP_del_cor_HETU_200.txt'
-Type_of_annot_8='broadPeak'             
-Genes_set_name_8='HETU_no_dps_rfa_200'         
-##9##                                   
-Path_to_annotation_9=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_no_tRNA_rRNA_EP_del_cor_LETU_200.txt'
-Type_of_annot_9='broadPeak'             
-Genes_set_name_9='LETU_no_dps_200'  
-##10##                                   
-Path_to_annotation_10=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_NO_DPS_EP_Long_Active_TUs_del_cor.txt'
-Type_of_annot_10='broadPeak'             
-Genes_set_name_10='LATU_no_dps'  
+Genes_set_name_5='tRNA_49'    
 
 #Path to the file with regions to be omitted (e.g. deletions).
-Deletions_inpath='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoIV-Topo-Seq\Scripts\TopoIV_Topo-Seq_experiment\Additional_genome_features\\Deletions_w3110_G_Mu_SGS.broadPeak'
+Deletions_inpath='TopoIV_Topo-Seq_experiment\Additional_genome_features\\Deletions_w3110_G_Mu_SGS.broadPeak'
 #Width of US, DS regions.
 Win_width=15000
 #Length of GB.
@@ -63,9 +59,13 @@ Bin_width=200
 
 #Dictionary of pathes to input data.
 Set_name='TopoIV_MukB_binned'
-Dict_of_wigs_path={'TopoIV'  : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopoIV_Cfx_FE_av.wig',
-                   'MukB'    : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Nolivos_MukB_IP_av.wig',
+Path_to_input_files='Data_analysis\FE\\'
+Dict_of_wigs_path={'TopoIV_Cfx'                    : Path_to_input_files + 'TopoIV_Cfx_av.wig',
+                   'TopoIV_GyrA_S83L_Cfx'          : Path_to_input_files + 'TopoIV_GyrA_S83L_Cfx_av.wig',
+                   'MukB'                          : Path_to_input_files + 'Nolivos_MukB_IP_av_FE.wig', 
+                   'Gyrase'                        : Path_to_input_files + 'Sutormin_Gyrase_Cfx_10mkM_FE_av.wig'
                    }
+
 
 
 #######
@@ -78,7 +78,7 @@ def Dir_check_create(some_path):
     return
 
 #Path to the output directory.
-Out_path='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Signal_over_TUs\Representative_transcripts\\'
+Out_path='Data_analysis\Metagene_plots_repr_transcripts\\'
 
 #Output path.
 def create_out_dirs(out_path, genes_set_name, track_set_name):
@@ -88,12 +88,11 @@ def create_out_dirs(out_path, genes_set_name, track_set_name):
     Dir_check_create(f'{out_path}\Signal_of_TUs_wig\{track_set_name}\{genes_set_name}')    
     return
 
-create_out_dirs(Out_path, Genes_set_name_7,  Set_name)
-create_out_dirs(Out_path, Genes_set_name_6,  Set_name)
+create_out_dirs(Out_path, Genes_set_name_1,  Set_name)
+create_out_dirs(Out_path, Genes_set_name_2,  Set_name)
+create_out_dirs(Out_path, Genes_set_name_3,  Set_name)
+create_out_dirs(Out_path, Genes_set_name_4,  Set_name)
 create_out_dirs(Out_path, Genes_set_name_5,  Set_name)
-create_out_dirs(Out_path, Genes_set_name_8,  Set_name)
-create_out_dirs(Out_path, Genes_set_name_9,  Set_name)
-create_out_dirs(Out_path, Genes_set_name_10, Set_name)
 
 
 #######
@@ -456,8 +455,8 @@ def genes_and_FE_nss(gene_annotation, genes_set_name, tracks_group_name, FE_trac
     print(f'Writing FE over TU, GB, DS...')
     gene_binned_mean=np.concatenate((gene_US_binned_mean, gene_B_binned_mean, gene_DS_binned_mean), axis=None)
     gene_binned_std=np.concatenate((gene_US_binned_std,  gene_B_binned_std,  gene_DS_binned_std),  axis=None)
-    write_wig(gene_binned_mean, f'{out_path}\Signal_of_TUs_wig\\{genes_set_name}\Mean_signal_{FE_track_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig', f'{win_width}_{length}_{bin_width}')
-    write_wig(gene_binned_std,  f'{out_path}\Signal_of_TUs_wig\\{genes_set_name}\STD_signal_{FE_track_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig',  f'{win_width}_{length}_{bin_width}')
+    write_wig(gene_binned_mean, f'{out_path}\Signal_of_TUs_wig\{tracks_group_name}\{genes_set_name}\Mean_signal_{FE_track_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig', f'{win_width}_{length}_{bin_width}')
+    write_wig(gene_binned_std,  f'{out_path}\Signal_of_TUs_wig\{tracks_group_name}\{genes_set_name}\STD_signal_{FE_track_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig',  f'{win_width}_{length}_{bin_width}')
 
 
     #Plot FE over US, GB, DS. 
@@ -571,8 +570,8 @@ def genes_FE_comb_plot(gene_annotation, genes_set_name, tracks_group_name, track
         #Concatenate US, GB, DS.
         gene_binned_mean=np.concatenate((condition_data['US_mean'], condition_data['GB_mean'], condition_data['DS_mean']), axis=None)
         gene_binned_std=np.concatenate((condition_data['US_STD'], condition_data['GB_STD'], condition_data['DS_STD']),  axis=None)
-        write_wig(gene_binned_mean,   f'{out_path}\Signal_of_TUs_wig\\{genes_set_name}\Mean_normalized_signal_{tracks_group_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig',   f'{win_width}_{length}_{bin_width}')    
-        write_wig(gene_binned_std,    f'{out_path}\Signal_of_TUs_wig\\{genes_set_name}\STD_normalized_signal_{tracks_group_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig',    f'{win_width}_{length}_{bin_width}')
+        write_wig(gene_binned_mean,   f'{out_path}\Signal_of_TUs_wig\{tracks_group_name}\{genes_set_name}\Mean_normalized_signal_{tracks_group_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig',   f'{win_width}_{length}_{bin_width}')    
+        write_wig(gene_binned_std,    f'{out_path}\Signal_of_TUs_wig\{tracks_group_name}\{genes_set_name}\STD_normalized_signal_{tracks_group_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp_bin_width_{bin_width}bp.wig',    f'{win_width}_{length}_{bin_width}')
         
         #Calculate upper and lower confidential intervals (+/- STE).
         Upper_conf_interval=np.array(gene_binned_mean)+(np.array(gene_binned_std)/np.sqrt(Num_genes))
@@ -586,7 +585,7 @@ def genes_FE_comb_plot(gene_annotation, genes_set_name, tracks_group_name, track
     plot1=plt.subplot(111)  
     
     positions_bn=np.arange(-win_width+int(bin_width/2), win_width+length-int(bin_width/2)+1, bin_width)
-    color_ar=['#6a65c7', '#c96458', '#333738', '#B6B8BD', '#d9ac3a']
+    color_ar=['#6a65c7', '#c96458', '#333738', '#B6B8BD', '#d9ac3a', '#31ed57']
     
     i=0
     for condition_name, condition_data in Mean_STD_dict_concat.items():
@@ -731,9 +730,8 @@ def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot
     
     return
 
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_1,  Type_of_annot_1,  Genes_set_name_1,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_2,  Type_of_annot_2,  Genes_set_name_2,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_3,  Type_of_annot_3,  Genes_set_name_3,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_4,  Type_of_annot_4,  Genes_set_name_4,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
 Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_6,  Type_of_annot_6,  Genes_set_name_6,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_7,  Type_of_annot_7,  Genes_set_name_7,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_8,  Type_of_annot_8,  Genes_set_name_8,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_9,  Type_of_annot_9,  Genes_set_name_9,  Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Set_name, Deletions_inpath, Win_width, Length, Bin_width, Out_path)

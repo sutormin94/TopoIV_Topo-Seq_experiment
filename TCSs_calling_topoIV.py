@@ -1,5 +1,5 @@
 ###############################################
-##Dmitry Sutormin, 2019##
+##Dmitry Sutormin, 2022##
 ##TopoIV Topo-Seq analysis##
 
 #The script takes tetrades of WIG files contain N3E or N5E values: A+IP+, A+IP-, A-IP+, A-IP-.
@@ -36,15 +36,16 @@ locale.getdefaultlocale()
 #######
 
 #Path to the working directory
-pwd="F:\TopoIV_Topo-Seq\\"
+pwd="Data_analysis\\"
 #Path to the file with regions to be omitted (e.g. deletions).
-Deletions="C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak"
+Deletions="TopoIV_Topo-Seq_experiment\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak"
 #Path to the reference genome
-Genome="C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome="TopoIV_Topo-Seq_experiment\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Confident level for GCSs calling.
 conf_level_0_05=0.05
 conf_level_0_01=0.01
-motif_win_width=1000
+motif_win_width_1000=1000
+motif_win_width_220=220
 
 
 
@@ -388,6 +389,7 @@ def plot_enrichment_signal(fname, IP_nd_ends, mock_nd_ends, un_IP_sm, un_mock_sm
     plot1.legend(loc='upper right')
     plt.show()
     plt.savefig(path_out+fname+'_signal_enrichment.png', dpi=300, figsize=(16, 8))
+    plt.savefig(path_out+fname+'_signal_enrichment.svg', dpi=300, figsize=(16, 8))
     plt.close()
     return
 
@@ -469,159 +471,88 @@ def GCSs_caller(tetrade_dictionary, deletions_inpath, genome_path, path_out, con
 #############
 ###########Confidence level 0.05
 #############
+
+
 #Paths to the WIG files contain N3E or N5E that forms a tetrade: A+IP+, A+IP-, A-IP+, A-IP-.
 #Name of the set (e.g. Cfx, RifCfx, Micro, Oxo and so on).
-Tetrade_replic_1_10mkM={'A+IP+': pwd + "WIG\DSu_52_S39_edt_N3E.wig",
-                     'A+IP-': pwd + "WIG\DSu_51_S38_edt_N3E.wig",
-                     'A-IP+': pwd + "WIG\DSu_50_S37_edt_N3E.wig", 
-                     'A-IP-': pwd + "WIG\DSu_49_S36_edt_N3E.wig",
-                     'Tetrade name': 'Replic_1_Cfx_10_mkM'
-                     }   
+Tetrade_replic_1_10mkM={'A+IP+': pwd + "WIG\wt_replic_1_Cfx_IP_N3E.wig",
+                        'A+IP-': pwd + "WIG\wt_replic_1_Cfx_no_IP_N3E.wig",
+                        'A-IP+': pwd + "WIG\wt_replic_1_no_Cfx_IP_N3E.wig", 
+                        'A-IP-': pwd + "WIG\wt_replic_1_no_Cfx_no_IP_N3E.wig",
+                        'Tetrade name': 'Replic_1_Cfx_10_mkM'
+                        }   
 #Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_05}_{motif_win_width}\\{Tetrade_replic_1_10mkM["Tetrade name"]}\\'
+Path_for_output=f'{pwd}TCSs_analysis\TCSs_calling_{conf_level_0_05}_{motif_win_width_220}\\{Tetrade_replic_1_10mkM["Tetrade name"]}\\'
 if not os.path.exists(Path_for_output):
     os.makedirs(Path_for_output)
-GCSs_caller(Tetrade_replic_1_10mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width)
+GCSs_caller(Tetrade_replic_1_10mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width_220)
 
-Tetrade_replic_2_10mkM={'A+IP+': pwd + "WIG\DSu_74_S61_edt_N3E.wig", 
-               'A+IP-': pwd + "WIG\DSu_73_S60_edt_N3E.wig",
-               'A-IP+': pwd + "WIG\DSu_72_S59_edt_N3E.wig", #DSu_71_S58_edt_N3E, which is true A-IP+ has strange spikes in coverage depth.
-               'A-IP-': pwd + "WIG\DSu_72_S59_edt_N3E.wig",
-               'Tetrade name': 'Replic_2_Cfx_10_mkM'
-               }
+
+Tetrade_replic_2_10mkM={'A+IP+': pwd + "WIG\wt_replic_2_Cfx_IP_N3E.wig", 
+                        'A+IP-': pwd + "WIG\wt_replic_2_Cfx_no_IP_N3E.wig",
+                        'A-IP+': pwd + "WIG\wt_replic_2_no_Cfx_IP_N3E.wig", 
+                        'A-IP-': pwd + "WIG\wt_replic_2_no_Cfx_no_IP_N3E.wig",
+                        'Tetrade name': 'Replic_2_Cfx_10_mkM'
+                        }
 #Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_05}_{motif_win_width}\\{Tetrade_replic_2_10mkM["Tetrade name"]}\\'
+Path_for_output=f'{pwd}TCSs_analysis\TCSs_calling_{conf_level_0_05}_{motif_win_width_220}\\{Tetrade_replic_2_10mkM["Tetrade name"]}\\'
 if not os.path.exists(Path_for_output):
     os.makedirs(Path_for_output)  
-GCSs_caller(Tetrade_replic_2_10mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width)
+GCSs_caller(Tetrade_replic_2_10mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width_220)
 
-Tetrade_replic_1_100mkM={'A+IP+': pwd + "WIG\DSu_54_S41_edt_N3E.wig",
-                     'A+IP-': pwd + "WIG\DSu_53_S40_edt_N3E.wig",
-                     'A-IP+': pwd + "WIG\DSu_50_S37_edt_N3E.wig", 
-                     'A-IP-': pwd + "WIG\DSu_49_S36_edt_N3E.wig",
-                     'Tetrade name': 'Replic_1_Cfx_100_mkM'
-                     }   
+
+Tetrade_replic_3_10mkM={'A+IP+': pwd + "WIG\wt_replic_3_Cfx_IP_N3E.wig",
+                        'A+IP-': pwd + "WIG\wt_replic_3_Cfx_no_IP_N3E.wig",
+                        'A-IP+': pwd + "WIG\wt_replic_3_no_Cfx_IP_N3E.wig",  
+                        'A-IP-': pwd + "WIG\wt_replic_3_no_Cfx_no_IP_N3E.wig",
+                        'Tetrade name': 'Replic_3_Cfx_10_mkM'
+                        }   
 #Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_05}_{motif_win_width}\\{Tetrade_replic_1_100mkM["Tetrade name"]}\\'
+Path_for_output=f'{pwd}TCSs_analysis\TCSs_calling_{conf_level_0_05}_{motif_win_width_220}\\{Tetrade_replic_3_10mkM["Tetrade name"]}\\'
 if not os.path.exists(Path_for_output):
     os.makedirs(Path_for_output)
-GCSs_caller(Tetrade_replic_1_100mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width)
+GCSs_caller(Tetrade_replic_3_10mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width_220)
 
-Tetrade_replic_2_100mkM={'A+IP+': pwd + "WIG\DSu_78_S65_edt_N3E.wig", 
-               'A+IP-': pwd + "WIG\DSu_77_S64_edt_N3E.wig",
-               'A-IP+': pwd + "WIG\DSu_76_S63_edt_N3E.wig", 
-               'A-IP-': pwd + "WIG\DSu_75_S62_edt_N3E.wig",
-               'Tetrade name': 'Replic_2_Cfx_100_mkM'
-               }
+
+Tetrade_replic_1_10mkM_gyrS83L={'A+IP+': pwd + "WIG\gyrA-S83L_replic_1_Cfx_IP_N3E.wig",
+                                'A+IP-': pwd + "WIG\gyrA-S83L_replic_1_Cfx_no_IP_N3E.wig",
+                                'A-IP+': pwd + "WIG\gyrA-S83L_replic_1_no_Cfx_IP_N3E.wig",  
+                                'A-IP-': pwd + "WIG\gyrA-S83L_replic_1_no_Cfx_no_IP_N3E.wig",
+                                'Tetrade name': 'Replic_1_Cfx_10_mkM_gyrA_S83L'
+                                }
 #Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_05}_{motif_win_width}\\{Tetrade_replic_2_100mkM["Tetrade name"]}\\'
+Path_for_output=f'{pwd}TCSs_analysis\TCSs_calling_{conf_level_0_05}_{motif_win_width_220}\\{Tetrade_replic_1_10mkM_gyrS83L["Tetrade name"]}\\'
 if not os.path.exists(Path_for_output):
     os.makedirs(Path_for_output)  
-GCSs_caller(Tetrade_replic_2_100mkM, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width)
+GCSs_caller(Tetrade_replic_1_10mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width_220)
 
-Tetrade_replic_1_10mkM_gyrS83L={'A+IP+': pwd + "WIG\DSu_58_S45_edt_N3E.wig",
-                     'A+IP-': pwd + "WIG\DSu_57_S44_edt_N3E.wig",
-                     'A-IP+': pwd + "WIG\DSu_56_S43_edt_N3E.wig", 
-                     'A-IP-': pwd + "WIG\DSu_55_S42_edt_N3E.wig",
-                     'Tetrade name': 'Replic_1_Cfx_10_mkM_gyrA_S83L'
-                     }   
+
+Tetrade_replic_2_10mkM_gyrS83L={'A+IP+': pwd + "WIG\gyrA-S83L_replic_2_Cfx_IP_N3E.wig",
+                                'A+IP-': pwd + "WIG\gyrA-S83L_replic_2_Cfx_no_IP_N3E.wig",
+                                'A-IP+': pwd + "WIG\gyrA-S83L_replic_2_no_Cfx_IP_N3E.wig",   
+                                'A-IP-': pwd + "WIG\gyrA-S83L_replic_2_no_Cfx_no_IP_N3E.wig",
+                                'Tetrade name': 'Replic_2_Cfx_10_mkM_gyrA_S83L'
+                                }   
 #Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_05}_{motif_win_width}\\{Tetrade_replic_1_10mkM_gyrS83L["Tetrade name"]}\\'
+print(conf_level_0_05, motif_win_width_220)
+Path_for_output=f'{pwd}TCSs_analysis\TCSs_calling_{conf_level_0_05}_{motif_win_width_220}\\{Tetrade_replic_2_10mkM_gyrS83L["Tetrade name"]}\\'
 if not os.path.exists(Path_for_output):
     os.makedirs(Path_for_output)
-GCSs_caller(Tetrade_replic_1_10mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width)
+GCSs_caller(Tetrade_replic_2_10mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width_220)
 
-Tetrade_replic_1_100mkM_gyrS83L={'A+IP+': pwd + "WIG\DSu_62_S49_edt_N3E.wig", 
-               'A+IP-': pwd + "WIG\DSu_61_S48_edt_N3E.wig",
-               'A-IP+': pwd + "WIG\DSu_60_S47_edt_N3E.wig",
-               'A-IP-': pwd + "WIG\DSu_59_S46_edt_N3E.wig",
-               'Tetrade name': 'Replic_1_Cfx_100_mkM_gyrA_S83L'
-               }
+
+Tetrade_replic_3_10mkM_gyrS83L={'A+IP+': pwd + "WIG\gyrA-S83L_replic_3_Cfx_IP_N3E.wig",
+                                'A+IP-': pwd + "WIG\gyrA-S83L_replic_3_Cfx_no_IP_N3E.wig",
+                                'A-IP+': pwd + "WIG\gyrA-S83L_replic_3_no_Cfx_IP_N3E.wig",   
+                                'A-IP-': pwd + "WIG\gyrA-S83L_replic_3_no_Cfx_no_IP_N3E.wig",
+                                'Tetrade name': 'Replic_3_Cfx_10_mkM_gyrA_S83L'
+                                }   
 #Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_05}_{motif_win_width}\\{Tetrade_replic_1_100mkM_gyrS83L["Tetrade name"]}\\'
-if not os.path.exists(Path_for_output):
-    os.makedirs(Path_for_output)  
-GCSs_caller(Tetrade_replic_1_100mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width)
-
-
-
-
-#############
-###########Confidence level 0.01
-#############
-#Paths to the WIG files contain N3E or N5E that forms a tetrade: A+IP+, A+IP-, A-IP+, A-IP-.
-#Name of the set (e.g. Cfx, RifCfx, Micro, Oxo and so on).
-Tetrade_replic_1_10mkM={'A+IP+': pwd + "WIG\DSu_52_S39_edt_N3E.wig",
-                     'A+IP-': pwd + "WIG\DSu_51_S38_edt_N3E.wig",
-                     'A-IP+': pwd + "WIG\DSu_50_S37_edt_N3E.wig", 
-                     'A-IP-': pwd + "WIG\DSu_49_S36_edt_N3E.wig",
-                     'Tetrade name': 'Replic_1_Cfx_10_mkM'
-                     }   
-#Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_01}_{motif_win_width}\\{Tetrade_replic_1_10mkM["Tetrade name"]}\\'
+print(conf_level_0_05, motif_win_width_220)
+Path_for_output=f'{pwd}TCSs_analysis\TCSs_calling_{conf_level_0_05}_{motif_win_width_220}\\{Tetrade_replic_3_10mkM_gyrS83L["Tetrade name"]}\\'
 if not os.path.exists(Path_for_output):
     os.makedirs(Path_for_output)
-GCSs_caller(Tetrade_replic_1_10mkM, Deletions, Genome, Path_for_output, conf_level_0_01, motif_win_width)
-
-Tetrade_replic_2_10mkM={'A+IP+': pwd + "WIG\DSu_74_S61_edt_N3E.wig", 
-               'A+IP-': pwd + "WIG\DSu_73_S60_edt_N3E.wig",
-               'A-IP+': pwd + "WIG\DSu_72_S59_edt_N3E.wig", #DSu_71_S58_edt_N3E, which is true A-IP+ has strange spikes in coverage depth.
-               'A-IP-': pwd + "WIG\DSu_72_S59_edt_N3E.wig",
-               'Tetrade name': 'Replic_2_Cfx_10_mkM'
-               }
-#Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_01}_{motif_win_width}\\{Tetrade_replic_2_10mkM["Tetrade name"]}\\'
-if not os.path.exists(Path_for_output):
-    os.makedirs(Path_for_output)  
-GCSs_caller(Tetrade_replic_2_10mkM, Deletions, Genome, Path_for_output, conf_level_0_01, motif_win_width)
-
-Tetrade_replic_1_100mkM={'A+IP+': pwd + "WIG\DSu_54_S41_edt_N3E.wig",
-                     'A+IP-': pwd + "WIG\DSu_53_S40_edt_N3E.wig",
-                     'A-IP+': pwd + "WIG\DSu_50_S37_edt_N3E.wig", 
-                     'A-IP-': pwd + "WIG\DSu_49_S36_edt_N3E.wig",
-                     'Tetrade name': 'Replic_1_Cfx_100_mkM'
-                     }   
-#Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_01}_{motif_win_width}\\{Tetrade_replic_1_100mkM["Tetrade name"]}\\'
-if not os.path.exists(Path_for_output):
-    os.makedirs(Path_for_output)
-GCSs_caller(Tetrade_replic_1_100mkM, Deletions, Genome, Path_for_output, conf_level_0_01, motif_win_width)
-
-Tetrade_replic_2_100mkM={'A+IP+': pwd + "WIG\DSu_78_S65_edt_N3E.wig", 
-               'A+IP-': pwd + "WIG\DSu_77_S64_edt_N3E.wig",
-               'A-IP+': pwd + "WIG\DSu_76_S63_edt_N3E.wig", 
-               'A-IP-': pwd + "WIG\DSu_75_S62_edt_N3E.wig",
-               'Tetrade name': 'Replic_2_Cfx_100_mkM'
-               }
-#Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_01}_{motif_win_width}\\{Tetrade_replic_2_100mkM["Tetrade name"]}\\'
-if not os.path.exists(Path_for_output):
-    os.makedirs(Path_for_output)  
-GCSs_caller(Tetrade_replic_2_100mkM, Deletions, Genome, Path_for_output, conf_level_0_01, motif_win_width)
-
-Tetrade_replic_1_10mkM_gyrS83L={'A+IP+': pwd + "WIG\DSu_58_S45_edt_N3E.wig",
-                     'A+IP-': pwd + "WIG\DSu_57_S44_edt_N3E.wig",
-                     'A-IP+': pwd + "WIG\DSu_56_S43_edt_N3E.wig", 
-                     'A-IP-': pwd + "WIG\DSu_55_S42_edt_N3E.wig",
-                     'Tetrade name': 'Replic_1_Cfx_10_mkM_gyrA_S83L'
-                     }   
-#Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_01}_{motif_win_width}\\{Tetrade_replic_1_10mkM_gyrS83L["Tetrade name"]}\\'
-if not os.path.exists(Path_for_output):
-    os.makedirs(Path_for_output)
-GCSs_caller(Tetrade_replic_1_10mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_01, motif_win_width)
-
-Tetrade_replic_1_100mkM_gyrS83L={'A+IP+': pwd + "WIG\DSu_62_S49_edt_N3E.wig", 
-               'A+IP-': pwd + "WIG\DSu_61_S48_edt_N3E.wig",
-               'A-IP+': pwd + "WIG\DSu_60_S47_edt_N3E.wig",
-               'A-IP-': pwd + "WIG\DSu_59_S46_edt_N3E.wig",
-               'Tetrade name': 'Replic_1_Cfx_100_mkM_gyrA_S83L'
-               }
-#Output folder
-Path_for_output=f'{pwd}GCSs_analysis\GCSs_calling_{conf_level_0_01}_{motif_win_width}\\{Tetrade_replic_1_100mkM_gyrS83L["Tetrade name"]}\\'
-if not os.path.exists(Path_for_output):
-    os.makedirs(Path_for_output)  
-GCSs_caller(Tetrade_replic_1_100mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_01, motif_win_width)
+GCSs_caller(Tetrade_replic_3_10mkM_gyrS83L, Deletions, Genome, Path_for_output, conf_level_0_05, motif_win_width_220)
 
 
 print('Script ended its work succesfully!')

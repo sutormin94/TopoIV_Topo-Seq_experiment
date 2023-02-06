@@ -1,0 +1,8 @@
+TU_ID	Gene_name	Start	End	Strand	Expression_E	Description
+1808	rrsA-ileT-alaT-rrlA-rrfA	3597167	3602563	-	25857,49368	rrsA-ileT-alaT-rrlA-rrfA
+1881	rrsE-gltV-rrlE-rrfE	3424645	3429939	-	25634,83185	rrsE-gltV-rrlE-rrfE
+1757	rrsC-gltU-rrlC-rrfC	3690736	3696286	-	25448,51587	rrsC-gltU-rrlC-rrfC
+1498	rrsD-ileU-alaU-rrlD-rrfD-thrV-rrfF	4212491	4217876	+	25367,47961	rrsD-ileU-alaU-rrlD-rrfD-thrV-rrfF
+126	rrsH-ileV-alaV-rrlH-rrfH	223485	228874	+	25252,94626	rrsH-ileV-alaV-rrlH-rrfH
+1165	rrsG-gltW-rrlG-rrfG	2725847	2731225	-	24949,12696	rrsG-gltW-rrlG-rrfG
+1864	rrsB-gltT-rrlB-rrfB	3465841	3471435	-	24522,78302	rrsB-gltT-rrlB-rrfB
